@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "CineApp",
+    "slug": "cine-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "android": {
+      "package": "com.udb.cineapp",
+      "permissions": [
+        "CAMERA",
+        "USE_BIOMETRIC",
+        "USE_FINGERPRINT"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Permitir a CineApp acceder a tu cámara para escanear boletos."
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Permitir a CineApp usar Face ID para acceder a la Zona de Personal."
+        }
+      ]
+    ]
+  }
+}
