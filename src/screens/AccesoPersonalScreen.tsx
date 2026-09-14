@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import * as LocalAuthentication from 'expo-local-authentication';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../navigation/types';
+import { useSesionPersonal } from '../auth/SesionPersonal';
 
 export default function AccesoPersonalScreen() {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { entrar } = useSesionPersonal();
   const [verificando, setVerificando] = useState(false);
   const [mensaje, setMensaje] = useState('');
 
@@ -32,14 +30,16 @@ export default function AccesoPersonalScreen() {
 
       const resultado = await LocalAuthentication.authenticateAsync({
         promptMessage: 'Verifica tu identidad para acceder a la Zona de Personal',
-        fallbackLabel: 'Usar código del dispositivo',
+        disableDeviceFallback: true,
+        biometricsSecurityLevel: 'strong',
+        fallbackLabel: '',
         cancelLabel: 'Cancelar',
       });
 
       setVerificando(false);
 
       if (resultado.success) {
-        navigation.replace('PersonalHome');
+        entrar();
       } else {
         setMensaje('No se pudo verificar tu identidad. Inténtalo de nuevo.');
       }

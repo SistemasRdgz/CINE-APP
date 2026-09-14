@@ -19,6 +19,9 @@ export default function Asiento({ id, estado, onPress }: Props) {
         estado === 'Seleccionado' && styles.seleccionado,
         estado === 'Ocupado' && styles.ocupado,
       ]}
+      accessibilityRole="button"
+      accessibilityLabel={`Asiento ${id}: ${estado}`}
+      accessibilityState={{ disabled, selected: estado === 'Seleccionado' }}
       disabled={disabled}
       onPress={onPress}
     >

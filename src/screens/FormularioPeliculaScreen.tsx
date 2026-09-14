@@ -14,6 +14,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import { agregarPelicula, editarPelicula } from '../redux/slices/peliculasSlice';
 import { RootStackParamList } from '../navigation/types';
+import { normalizar } from '../domain/cine';
 import { Pelicula, EstadoPelicula } from '../types/pelicula';
 
 export default function FormularioPeliculaScreen() {
@@ -47,7 +48,7 @@ export default function FormularioPeliculaScreen() {
   const validar = (): string[] => {
     const errs: string[] = [];
     if (!codigo.trim()) errs.push('El código es obligatorio.');
-    if (!esEdicion && peliculas.some((p) => p.codigo.trim() === codigo.trim())) {
+    if (!esEdicion && peliculas.some((p) => normalizar(p.codigo) === normalizar(codigo))) {
       errs.push('Ya existe una película con ese código.');
     }
     if (!nombre.trim()) errs.push('El nombre es obligatorio.');
@@ -55,11 +56,11 @@ export default function FormularioPeliculaScreen() {
     if (!clasificacion.trim()) errs.push('La clasificación es obligatoria.');
     if (!salaAsignada.trim()) errs.push('Debes asignar una sala.');
     const duracionNum = Number(duracion);
-    if (!duracion || isNaN(duracionNum) || duracionNum <= 0) {
-      errs.push('La duración debe ser un número mayor a 0.');
+    if (!duracion || !Number.isInteger(duracionNum) || duracionNum <= 0) {
+      errs.push('La duración debe ser un número entero mayor a 0.');
     }
     const precioNum = Number(precio);
-    if (precio === '' || isNaN(precioNum) || precioNum < 0) {
+    if (precio === '' || !Number.isFinite(precioNum) || precioNum < 0) {
       errs.push('El precio no puede ser negativo ni estar vacío.');
     }
     return errs;
@@ -77,7 +78,7 @@ export default function FormularioPeliculaScreen() {
       duracion: Number(duracion),
       clasificacion: clasificacion.trim(),
       salaAsignada: salaAsignada.trim(),
-      precio: Number(precio),
+      precio: Math.round(Number(precio) * 100) / 100,
       estado,
     };
 

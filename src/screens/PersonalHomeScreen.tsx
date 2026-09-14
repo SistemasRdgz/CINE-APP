@@ -2,11 +2,13 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useSesionPersonal } from '../auth/SesionPersonal';
 import { RootStackParamList } from '../navigation/types';
 
 export default function PersonalHomeScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
+  const { salir } = useSesionPersonal();
   return (
     <View style={styles.contenedor}>
       <Text style={styles.titulo}>Zona de Personal</Text>
@@ -20,26 +22,25 @@ export default function PersonalHomeScreen() {
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={[styles.opcion, styles.opcionDeshabilitada]}
+        style={styles.opcion}
         onPress={() => navigation.navigate('Dashboard')}
       >
         <Text style={styles.opcionTexto}>📊 Dashboard y Estadísticas</Text>
-        <Text style={styles.proximamente}>(próximo módulo)</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={[styles.opcion, styles.opcionDeshabilitada]}
+        style={styles.opcion}
         onPress={() => navigation.navigate('Escaner')}
       >
         <Text style={styles.opcionTexto}>📷 Validación de Boletos (QR)</Text>
-        <Text style={styles.proximamente}>(próximo módulo)</Text>
       </TouchableOpacity>
 
+      <TouchableOpacity style={styles.opcion} onPress={() => navigation.navigate('Funciones')}>
+        <Text style={styles.opcionTexto}>Funciones y horarios</Text>
+      </TouchableOpacity>
       <TouchableOpacity
         style={styles.botonSalir}
-        onPress={() =>
-          navigation.reset({ index: 0, routes: [{ name: 'ClienteTabs' }] })
-        }
+        onPress={salir}
       >
         <Text style={styles.botonSalirTexto}>Salir de la Zona de Personal</Text>
       </TouchableOpacity>

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,9 @@ import {
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
+import { nanoid } from '@reduxjs/toolkit';
+import { comprar } from '../redux/operaciones';
+import { guardarEstado } from '../redux/store';
 import Asiento from '../components/Asiento';
 import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import { agregarReserva, obtenerAsientosOcupados } from '../redux/slices/reservasSlice';
@@ -18,7 +21,7 @@ import { RootStackParamList } from '../navigation/types';
 import { EstadoAsiento } from '../types/asiento';
 
 function generarCodigoReserva(): string {
-  return 'BOL-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+  return 'BOL-' + nanoid().replace(/_/g, 'X').toUpperCase();
 }
 
 export default function MapaAsientosScreen() {
@@ -45,6 +48,10 @@ export default function MapaAsientosScreen() {
   const [nombreCliente, setNombreCliente] = useState('');
   const [emailCliente, setEmailCliente] = useState('');
   const [error, setError] = useState('');
+  const [guardando, setGuardando] = useState(false);
+  const bloqueo = useRef(false);
+  const registrada = useRef(false);
+  const codigoReserva = useRef(generarCodigoReserva());
 
   if (!pelicula || !sala || !funcion) {
     return (
@@ -61,7 +68,7 @@ export default function MapaAsientosScreen() {
   };
 
   const toggleAsiento = (id: string) => {
-    if (asientosOcupadosIds.has(id)) return;
+    if (registrada.current || asientosOcupadosIds.has(id)) return;
     setSeleccionados((prev) => {
       if (prev.includes(id)) return prev.filter((s) => s !== id);
       if (prev.length >= cantidad) {
@@ -74,46 +81,36 @@ export default function MapaAsientosScreen() {
 
   const total = pelicula.precio * cantidad;
 
-  const confirmarCompra = () => {
-    if (seleccionados.length !== cantidad) {
-      setError(`Debes seleccionar exactamente ${cantidad} asiento(s).`);
-      return;
-    }
-    if (!nombreCliente.trim()) {
-      setError('El nombre del cliente es obligatorio.');
-      return;
-    }
+  const confirmarCompra = async () => {
+    if (bloqueo.current) return;
+    bloqueo.current = true;
+    setGuardando(true);
     setError('');
-
-    dispatch(
-      agregarReserva({
-        id: generarCodigoReserva(),
-        funcionId: funcion.id,
-        peliculaCodigo: pelicula.codigo,
-        peliculaNombre: pelicula.nombre,
-        salaId: sala.id,
-        salaNombre: sala.nombre,
-        fecha: funcion.fecha,
-        hora: funcion.hora,
-        asientos: seleccionados,
-        cantidadBoletos: cantidad,
-        total,
-        cliente: { nombre: nombreCliente.trim(), email: emailCliente.trim() || undefined },
-        fechaCompra: new Date().toISOString(),
-        usado: false,
-      })
-    );
-
-    Alert.alert('Compra confirmada', 'Tu boleto se guardó en "Mis Boletos".', [
-      {
-        text: 'OK',
-        onPress: () =>
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'ClienteTabs' }],
-          }),
-      },
-    ]);
+    try {
+      if (!registrada.current) {
+        const resultado = dispatch(comprar({
+          id: codigoReserva.current,
+          funcionId: funcion.id, peliculaCodigo: pelicula.codigo,
+          peliculaNombre: pelicula.nombre, salaId: sala.id, salaNombre: sala.nombre,
+          fecha: funcion.fecha, hora: funcion.hora, asientos: seleccionados,
+          cantidadBoletos: cantidad, total: Math.round(total * 100) / 100,
+          cliente: { nombre: nombreCliente.trim(), email: emailCliente.trim() || undefined },
+          fechaCompra: new Date().toISOString(), usado: false,
+        }));
+        if (!resultado.ok) { setError(resultado.mensaje); return; }
+        registrada.current = true;
+      }
+      // Si falla el disco se reintenta guardar, nunca se crea una segunda compra.
+      await guardarEstado();
+      Alert.alert('Compra confirmada', 'Tu boleto y su QR se guardaron en Mis Boletos.', [
+        { text: 'OK', onPress: () => navigation.reset({ index: 0, routes: [{ name: 'ClienteTabs' }] }) },
+      ]);
+    } catch {
+      setError('No se pudo guardar en el dispositivo. Pulsa de nuevo para reintentar el guardado antes de cerrar la app.');
+    } finally {
+      bloqueo.current = false;
+      setGuardando(false);
+    }
   };
 
   return (
@@ -127,7 +124,7 @@ export default function MapaAsientosScreen() {
         <Text style={styles.pantallaTexto}>PANTALLA</Text>
       </View>
 
-      <View style={styles.mapa}>
+      <ScrollView horizontal contentContainerStyle={styles.mapa}>
         {sala.filas.map((fila) => (
           <View key={fila} style={styles.filaAsientos}>
             {Array.from({ length: sala.columnas }, (_, i) => {
@@ -136,7 +133,7 @@ export default function MapaAsientosScreen() {
             })}
           </View>
         ))}
-      </View>
+      </ScrollView>
 
       <View style={styles.leyenda}>
         <Leyenda color="#E5E7EB" texto="Disponible" />
@@ -168,8 +165,8 @@ export default function MapaAsientosScreen() {
 
       <Text style={styles.total}>Total a pagar: ${total.toFixed(2)}</Text>
 
-      <TouchableOpacity style={styles.botonConfirmar} onPress={confirmarCompra}>
-        <Text style={styles.botonConfirmarTexto}>Confirmar compra</Text>
+      <TouchableOpacity style={styles.botonConfirmar} disabled={guardando} onPress={confirmarCompra}>
+        <Text style={styles.botonConfirmarTexto}>{guardando ? 'Guardando...' : registrada.current ? 'Guardar compra registrada' : 'Confirmar compra'}</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -199,7 +196,7 @@ const styles = StyleSheet.create({
   pantallaTexto: { color: '#fff', fontSize: 11, letterSpacing: 2 },
   mapa: { alignItems: 'center', marginBottom: 12 },
   filaAsientos: { flexDirection: 'row' },
-  leyenda: { flexDirection: 'row', justifyContent: 'center', marginBottom: 16 },
+  leyenda: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginBottom: 16 },
   leyendaItem: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 8 },
   leyendaColor: { width: 12, height: 12, borderRadius: 3, marginRight: 4 },
   leyendaTexto: { fontSize: 12, color: '#555' },

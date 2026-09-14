@@ -1,4 +1,6 @@
 import React from 'react';
+import { useSesionPersonal } from '../auth/SesionPersonal';
+import FuncionesScreen from '../screens/FuncionesScreen';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
@@ -60,8 +62,10 @@ function PersonalPeliculasScreen() {
 }
 
 export default function AppNavigator() {
+  const { autorizado } = useSesionPersonal();
   return (
     <Stack.Navigator initialRouteName="ClienteTabs">
+      {!autorizado ? <Stack.Group navigationKey="cliente">
       <Stack.Screen
         name="ClienteTabs"
         component={ClienteTabs}
@@ -82,6 +86,7 @@ export default function AppNavigator() {
         component={AccesoPersonalScreen}
         options={{ title: 'Acceso del personal' }}
       />
+      </Stack.Group> : <Stack.Group navigationKey="personal">
       <Stack.Screen
         name="PersonalHome"
         component={PersonalHomeScreen}
@@ -99,6 +104,8 @@ export default function AppNavigator() {
       />
       <Stack.Screen name="Dashboard" component={DashboardScreen} options={{ title: 'Dashboard' }} />
       <Stack.Screen name="Escaner" component={EscanerScreen} options={{ title: 'Escáner QR' }} />
+      <Stack.Screen name="Funciones" component={FuncionesScreen} options={{ title: 'Gestión de funciones' }} />
+      </Stack.Group>}
     </Stack.Navigator>
   );
 }

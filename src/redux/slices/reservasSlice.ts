@@ -16,10 +16,11 @@ const reservasSlice = createSlice({
     agregarReserva: (state, action: PayloadAction<Reserva>) => {
       state.lista.push(action.payload);
     },
-    marcarBoletoUsado: (state, action: PayloadAction<string>) => {
-      const reserva = state.lista.find((r) => r.id === action.payload);
-      if (reserva) {
+    marcarBoletoUsado: (state, action: PayloadAction<{ id: string; fechaUso: string }>) => {
+      const reserva = state.lista.find((r) => r.id === action.payload.id);
+      if (reserva && !reserva.usado) {
         reserva.usado = true;
+        reserva.fechaUso = action.payload.fechaUso;
       }
     },
   },

@@ -3,6 +3,7 @@ import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
+import { normalizar } from '../domain/cine';
 import Buscador from '../components/Buscador';
 import Filtros from '../components/Filtros';
 import PeliculaFila from '../components/PeliculaFila';
@@ -23,6 +24,7 @@ export default function PeliculasScreen({ modo: modoProp }: Props) {
 
   const dispatch = useAppDispatch();
   const peliculas = useAppSelector((state) => state.peliculas.lista);
+  const salasDisponibles = useAppSelector(state => state.salas.lista);
 
   const [texto, setTexto] = useState('');
   const [genero, setGenero] = useState<string | null>(null);
@@ -44,7 +46,7 @@ export default function PeliculasScreen({ modo: modoProp }: Props) {
   );
 
   const peliculasFiltradas = useMemo(() => {
-    const t = texto.trim().toLowerCase();
+    const t = normalizar(texto);
     return peliculas.filter((p) => {
       if (modo === 'cliente' && p.estado !== 'Disponible') return false;
       if (estadoFiltro && p.estado !== estadoFiltro) return false;
@@ -53,15 +55,13 @@ export default function PeliculasScreen({ modo: modoProp }: Props) {
       if (sala && p.salaAsignada !== sala) return false;
       if (
         t.length > 0 &&
-        !`${p.nombre} ${p.genero} ${p.clasificacion} ${p.salaAsignada}`
-          .toLowerCase()
-          .includes(t)
+        !normalizar(`${p.nombre} ${p.genero} ${p.clasificacion} ${p.salaAsignada} ${salasDisponibles.find(s => s.id === p.salaAsignada)?.nombre ?? ''}`).includes(t)
       ) {
         return false;
       }
       return true;
     });
-  }, [peliculas, texto, genero, clasificacion, sala, estadoFiltro, modo]);
+  }, [peliculas, texto, genero, clasificacion, sala, estadoFiltro, modo, salasDisponibles]);
 
   const confirmarEliminar = (codigo: string, nombre: string) => {
     Alert.alert('Eliminar película', `¿Seguro que deseas eliminar "${nombre}"?`, [
@@ -80,10 +80,10 @@ export default function PeliculasScreen({ modo: modoProp }: Props) {
     },
     { etiqueta: 'Sala', opciones: salas, valorSeleccionado: sala, onSeleccionar: setSala },
   ];
-  if (modo === 'personal') {
+  {
     gruposFiltro.push({
       etiqueta: 'Estado',
-      opciones: ['Disponible', 'No disponible'],
+      opciones: modo === 'personal' ? ['Disponible', 'No disponible'] : ['Disponible'],
       valorSeleccionado: estadoFiltro,
       onSeleccionar: setEstadoFiltro,
     });

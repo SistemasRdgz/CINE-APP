@@ -3,6 +3,7 @@ import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert } from 'react
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
+import { funcionFutura } from '../domain/cine';
 import { useAppSelector } from '../redux/hooks';
 import { RootStackParamList } from '../navigation/types';
 import { obtenerAsientosOcupados } from '../redux/slices/reservasSlice';
@@ -21,7 +22,7 @@ export default function ReservaScreen() {
   const funciones = useMemo(() => {
     return salas.flatMap((s) =>
       s.funciones
-        .filter((f) => f.peliculaCodigo === peliculaCodigo)
+        .filter((f) => f.peliculaCodigo === peliculaCodigo && funcionFutura(f))
         .map((f) => ({ ...f, salaNombre: s.nombre, totalAsientos: s.filas.length * s.columnas }))
     );
   }, [salas, peliculaCodigo]);
@@ -48,6 +49,10 @@ export default function ReservaScreen() {
     : 0;
 
   const continuar = () => {
+    if (pelicula.estado !== 'Disponible') {
+      Alert.alert('No disponible', 'Esta película ya no está disponible para compra.');
+      return;
+    }
     if (!funcionActual) {
       Alert.alert('Selecciona una función', 'Debes elegir horario y sala para continuar.');
       return;

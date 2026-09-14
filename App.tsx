@@ -5,6 +5,7 @@ import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { ActivityIndicator, View } from 'react-native';
 
+import { SesionPersonalProvider } from './src/auth/SesionPersonal';
 import { store, persistor } from './src/redux/store';
 import AppNavigator from './src/navigation/AppNavigator';
 
@@ -20,10 +21,12 @@ export default function App() {
   return (
     <Provider store={store}>
       <PersistGate loading={<CargandoPantalla />} persistor={persistor}>
+        <SesionPersonalProvider>
         <NavigationContainer>
           <StatusBar style="auto" />
           <AppNavigator />
         </NavigationContainer>
+        </SesionPersonalProvider>
       </PersistGate>
     </Provider>
   );

@@ -1,11 +1,12 @@
 import { Pelicula } from '../types/pelicula';
+import { fechaLocal } from '../domain/cine';
 import { Sala } from '../types/sala';
 
 const hoy = new Date();
 const manana = new Date();
 manana.setDate(hoy.getDate() + 1);
 
-const formatoFecha = (d: Date) => d.toISOString().split('T')[0];
+const formatoFecha = fechaLocal;
 
 export const FECHA_HOY = formatoFecha(hoy);
 export const FECHA_MANANA = formatoFecha(manana);

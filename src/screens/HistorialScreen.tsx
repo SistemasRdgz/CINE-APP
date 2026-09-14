@@ -1,4 +1,5 @@
 import React from 'react';
+import BoletoQR from '../components/BoletoQR';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { useAppSelector } from '../redux/hooks';
 
@@ -27,6 +28,9 @@ export default function HistorialScreen() {
               {item.salaNombre} · {item.fecha} · {item.hora}
             </Text>
             <Text style={styles.detalle}>Asientos: {item.asientos.join(', ')}</Text>
+            <BoletoQR id={item.id} />
+            <Text style={styles.detalle}>Un QR por reserva: incluye todos los asientos indicados.</Text>
+            {!!item.fechaUso && <Text style={styles.detalle}>Utilizado: {new Date(item.fechaUso).toLocaleString()}</Text>}
             <Text style={styles.detalle}>Cliente: {item.cliente.nombre}</Text>
             <View style={styles.filaTotal}>
               <Text style={styles.total}>Total: ${item.total.toFixed(2)}</Text>
