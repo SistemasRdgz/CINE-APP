@@ -1,113 +1,88 @@
-# CineApp - Segundo Desafío Práctico
+# CineApp
 
-Aplicación Android de venta de entradas para cine. Continúa la base de los módulos 1-5 de SistemasRdgz y completa dashboard, QR, funciones y validaciones. Usa Expo SDK 51, React Native, TypeScript, Redux Toolkit, React Navigation y AsyncStorage. No consume APIs ni utiliza backend.
+**Tu próxima gran historia.**
 
-## Ejecutar
+Aplicación Android para consultar la cartelera, comprar entradas y administrar un cine. Desarrollada con React Native, Expo SDK 51, TypeScript, Redux Toolkit, React Navigation y AsyncStorage.
 
-Requisitos: Node.js 20.19 o posterior, npm, Git y Android con huella configurada (o emulador con biometría). El sensor es obligatorio para entrar a la zona de personal.
+## Funcionalidades
+
+- Cartelera con imágenes, búsqueda y filtros por género, clasificación, sala y estado.
+- Compra de entradas con selección de función, mapa de asientos y cálculo del total.
+- Historial de boletos con QR y estado de uso.
+- Acceso del personal mediante biometría fuerte.
+- Gestión de películas con imágenes de la galería y selectores de género y clasificación.
+- Gestión de salas con distribución configurable de filas y asientos.
+- Programación de funciones con calendario, reloj y validación de horarios repetidos.
+- Escáner QR para validar entradas y rechazar boletos reutilizados.
+- Dashboard de películas, funciones, ventas, ocupación, ingresos y película más reservada.
+- Modo claro y oscuro con preferencia guardada.
+- Persistencia local del catálogo, salas, funciones, reservas y boletos usados.
+
+## Instalación y ejecución
+
+Requisitos: Node.js 20.19 o posterior, npm y un dispositivo Android con biometría configurada para acceder a Personal.
+
+Desde la carpeta del proyecto:
 
 ```bash
 npm ci
-npm run typecheck
-npm test
-npx expo start --clear
+npx expo start --go --lan --clear
 ```
 
-**Expo Go debe ser compatible con SDK 51.** Descarga la versión Android correspondiente desde [Expo Go](https://expo.dev/go?sdkVersion=51&platform=android&device=true). La versión actual de la tienda puede no abrir este proyecto. Sigue la [guía oficial de incompatibilidad de versiones](https://docs.expo.dev/troubleshooting/expo-go-version-mismatch/). Se conserva SDK 51 para no mezclar la continuación del trabajo con una migración mayor.
+Conecta la computadora y el teléfono a la misma red. Abre el proyecto escaneando el QR con una versión de **Expo Go compatible con SDK 51**, disponible en [Expo Go para Android](https://expo.dev/go?sdkVersion=51&platform=android&device=true).
 
-Conecta computadora y teléfono a la misma red y escanea el QR de Expo. Este QR abre la aplicación; los QR de entradas se encuentran **dentro de Mis Boletos**.
+El QR del servidor de desarrollo abre la aplicación. Los QR de las entradas se encuentran dentro de **Mis Boletos**.
 
-Alternativa con Android SDK/JDK instalados:
+Como alternativa, con Android SDK y JDK configurados:
 
 ```bash
 npx expo run:android
 ```
 
-Esto genera y compila un proyecto Android nativo local. No se requiere un backend. El servidor de desarrollo entrega el código de la app, no almacena las ventas.
+## Uso
 
-## Diseño y experiencia
+### Cliente
 
-La interfaz usa carbón, vino, dorado y marfil. La cartelera conserva los filtros originales e incorpora CineApp, el eslogan «Tu próxima gran historia» y tarjetas con portadas. Los íconos de la aplicación usan MaterialCommunityIcons; no hay emojis en las pantallas.
+1. Busca una película en Cartelera.
+2. Selecciona una función futura, la cantidad de entradas y los asientos.
+3. Completa los datos del cliente y confirma la compra.
+4. Consulta el boleto y su QR en Mis Boletos.
 
-Al crear o editar una película se puede elegir una imagen de la galería. Se copia al directorio privado de la app (`posters/`) y Redux guarda su nombre relativo. La imagen continúa disponible si se elimina el original de la galería. Si no hay imagen, se muestra una portada vectorial local. No se descargan pósters de servidores externos.
+Los asientos comprados quedan ocupados para esa función. Utilizar el boleto no libera los asientos ni descuenta la venta.
 
-El formulario sugiere un código libre y ofrece listas de género, clasificación, sala y estado. Las funciones usan calendario y reloj nativos. Los diálogos de información y confirmación usan el tema propio; los permisos y la autenticación mantienen el control del sistema operativo.
+### Personal
 
-Las salas S1 y S2 se amplían a **8 filas (A-H) por 10 columnas: 80 asientos por función**. La migración de Redux Persist conserva películas, funciones, reservas y estados de uso. Por ello cambian los contadores de capacidad, no las ventas. El mapa muestra las filas apiladas, un pasillo después de la columna 5 y desplazamiento horizontal.
+Accede desde el botón Personal y autentícate con biometría. Desde esta sección puedes administrar películas, salas y funciones, consultar el dashboard y escanear boletos. La sesión se bloquea al salir o enviar normalmente la aplicación al fondo.
 
-Abrir el selector de imágenes conserva temporalmente el formulario. Salir normalmente de la aplicación sigue bloqueando la zona de personal.
+Para ofrecer una película nueva, asígnale una sala y programa al menos una función futura. Si las funciones iniciales ya pasaron, crea nuevos horarios.
 
-## Flujos
+Las salas permiten entre 1 y 26 filas y entre 1 y 20 asientos por fila. Su distribución solo puede modificarse mientras no tengan funciones. No se pueden eliminar salas con películas asignadas, funciones o reservas.
 
-**Cliente:** cartelera → función → cantidad → asientos → datos del cliente → confirmar → Mis Boletos. Solo se ofrecen películas disponibles y funciones futuras. Se comprueba de nuevo el estado actual de Redux al confirmar.
+## Almacenamiento y validación de entradas
 
-**Personal:** botón Personal → huella/biometría fuerte → películas, funciones, dashboard y escáner. No se acepta PIN como reemplazo. Las rutas administrativas no existen en el navegador del cliente. La sesión vive en memoria y se elimina al salir o mandar la aplicación al fondo.
+La aplicación funciona con datos locales, sin backend ni sincronización entre dispositivos. Para validar una entrada, utiliza el dispositivo en el que se realizó la compra: muestra una captura del QR en otra pantalla y escanéala desde Personal en el dispositivo original.
 
-**Funciones:** asigna la sala a la película en el CRUD y luego crea una fecha/hora en Gestión de funciones. Una película nueva necesita al menos una función futura para poder comprarla. Se impiden fechas inválidas, horarios pasados y un mismo horario en la misma sala. No se impiden solapamientos de duración: la consigna exige horario repetido exacto.
+Cada QR corresponde a una reserva completa y se acepta una sola vez. Los datos se conservan al cerrar y volver a abrir la aplicación; desinstalarla o borrar sus datos elimina el almacenamiento local.
 
-**QR:** cada reserva genera un QR que incluye todos los asientos comprados. Su primera lectura marca la reserva completa como usada; las lecturas posteriores se rechazan. El precio, los asientos y el estado se consultan en Redux, nunca se aceptan del contenido del QR.
+El dashboard acumula las funciones registradas y calcula la capacidad por función. Las ventas conservan sus datos históricos aunque una película cambie o se retire del catálogo.
 
-## Demostrar cámara con datos exclusivamente locales
+## Estructura
 
-Las compras solo existen en el dispositivo que las creó. Dos teléfonos con CineApp **no se sincronizan**, según la restricción de no usar backend.
-
-1. Compra en el teléfono A y abre Mis Boletos.
-2. Toma una captura del QR y muéstrala en la computadora o en otro teléfono. Ese segundo dispositivo solo muestra la imagen.
-3. En el teléfono A entra a Personal y abre el escáner.
-4. Escanea la imagen: debe aceptar el boleto. Escanea de nuevo: debe rechazarlo.
-5. Cierra por completo la app y vuelve a abrirla: el boleto continúa usado.
-
-No borres datos de la app ni la desinstales al probar persistencia. Los datos iniciales se crean solo en la primera apertura; si las funciones iniciales ya pasaron, agrega funciones futuras desde Personal.
-
-## Módulos
-
-| Módulo | Implementación |
-|---|---|
-| 1-2 | Catálogo, datos de películas, búsquedas dinámicas sin distinguir tildes y filtros |
-| 3 | Compra validada, selección táctil, total y bloqueo de doble compra |
-| 4 | Historial, QR, código, cliente, asientos, total y estado de uso |
-| 5 | Alta, edición, eliminación y cambio de estado de películas |
-| 6 | Siete indicadores derivados del estado, incluidos empates de película más reservada |
-| 7 | Cámara real, permisos, validación local y rechazo de reutilización |
-| 8 | Persistencia de películas, reservas, salas y funciones; recuperación al iniciar |
-| 9 | Biometría fuerte para personal y cámara para lectura QR |
-
-## Organización del código
-
-- `src/domain/cine.ts`: reglas de películas, funciones, compra, QR y estadísticas.
-- `src/redux/rootReducer.ts`: combina slices y protege operaciones entre slices.
-- `src/redux/operaciones.ts`: thunks síncronos que consultan el estado más reciente y devuelven mensajes al usuario.
-- `src/redux/store.ts`: Redux Persist y AsyncStorage.
-- `src/redux/almacenamiento.ts`: cola de escritura y reintento del último guardado fallido.
-- `src/auth/SesionPersonal.tsx`: sesión transitoria y bloqueo al pasar al fondo.
-- `src/navigation/AppNavigator.tsx`: tabs del cliente y stack condicional del personal.
-- `src/components/BoletoQR.tsx`: QR generado localmente con `qrcode-generator` y SVG.
-- `src/screens/`: interfaces con Flexbox y StyleSheet.
-- `tests/cine.test.ts`: regresiones de compra, funciones, QR, estadísticas y persistencia.
-
-## Estadísticas e historial
-
-El dashboard considera todas las funciones registradas. La capacidad se suma por función, no solo por sala; A1 puede venderse en distintos horarios. Boletos vendidos suma cantidades, no reservas. Ingresos suma totales en centavos. Película más reservada se determina por boletos vendidos y muestra empates.
-
-Eliminar una película la retira del catálogo pero conserva sus funciones y los datos históricos de sus ventas. Las nuevas compras de esa película quedan bloqueadas. Cambiar el nombre o precio de una película no modifica boletos ya emitidos. Una reserva utilizada sigue contando como venta y sus asientos permanecen ocupados.
+- `src/screens/`: pantallas del cliente y del personal.
+- `src/components/`: componentes reutilizables.
+- `src/navigation/`: navegación y rutas.
+- `src/auth/`: autenticación y sesión del personal.
+- `src/domain/`: reglas de compra, funciones, QR y estadísticas.
+- `src/redux/`: estado global, operaciones y persistencia.
+- `src/ui/`: apariencia y temas.
+- `tests/`: pruebas automatizadas.
 
 ## Verificación
 
 ```bash
 npm run typecheck
 npm test
-npx expo install --check
 npm run export:android
 ```
 
-Las pruebas de persistencia usan el adaptador de almacenamiento en memoria para simular una nueva instancia de Redux Persist. El cierre y reapertura reales, la cámara, los permisos y la biometría requieren validación en Android. La exportación genera un bundle JavaScript Android, **no un APK ni una prueba de hardware**.
-
-Consulta [docs/PRUEBAS-Y-DEFENSA.md](docs/PRUEBAS-Y-DEFENSA.md) para la matriz de la rúbrica y la demostración.
-
-## Gestión de salas y apariencia
-
-En **Personal → Gestión de salas** puedes crear salas, indicar nombre/código y definir de 1 a 26 filas y de 1 a 20 asientos por fila. Se muestra la capacidad antes de guardar. Las salas nuevas aparecen en el formulario de películas; asigna una película a la sala y luego programa su función.
-
-Se permite renombrar una sala. La distribución se puede modificar solo mientras no tenga funciones, para no invalidar asientos existentes. Se impide eliminar salas con películas asignadas, funciones o reservas. Las salas sin referencias se pueden eliminar con confirmación. La capacidad del dashboard se sigue calculando por función: crear una sala vacía no aumenta los lugares disponibles hasta programar una función.
-
-El botón de **sol/luna** en la barra superior alterna modo claro y oscuro, tanto para el cliente como para Personal. El tema se aplica mediante contexto, conserva la pantalla y los datos del formulario, y se persiste en el slice `preferencias` con AsyncStorage. Al actualizar desde una versión anterior sin esa preferencia se mantiene el modo oscuro inicial. Los QR siguen siendo negros sobre blanco y los pósters conservan sus colores. Los diálogos del sistema operativo (permisos, huella, fecha/hora) dependen del tema de Android.
+Las pruebas cubren reglas de compra, horarios, QR, estadísticas, salas y persistencia. La cámara y la biometría requieren comprobación en Android. La exportación genera el bundle JavaScript para Android; no genera un APK.
