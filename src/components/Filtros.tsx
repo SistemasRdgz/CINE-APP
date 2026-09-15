@@ -21,7 +21,7 @@ export default function Filtros({ grupos }: Props) {
       {grupos.map((grupo) => (
         <View key={grupo.etiqueta} style={styles.grupo}>
           <Text style={styles.etiquetaGrupo}>{grupo.etiqueta}</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.opciones}>
             <TouchableOpacity
               style={[styles.chip, grupo.valorSeleccionado === null && styles.chipActivo]}
               onPress={() => grupo.onSeleccionar(null)}
@@ -66,17 +66,24 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
   grupo: {
-    marginBottom: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+    gap: 8,
   },
+  opciones: { flex: 1, minWidth: 0 },
   etiquetaGrupo: {
     fontSize: 12,
     fontWeight: '600',
     color: colors.muted,
-    marginBottom: 4,
+    width: 80,
+    flexShrink: 0,
   },
   chip: {
     paddingHorizontal: 12,
-    paddingVertical: 10,
+    paddingVertical: 8,
+    minHeight: 40,
+    justifyContent: 'center',
     borderRadius: 16,
     backgroundColor: colors.raised,
     marginRight: 8,

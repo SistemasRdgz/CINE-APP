@@ -103,8 +103,8 @@ export default function PeliculasScreen({ modo: modoProp }: Props) {
       columnWrapperStyle={columnas > 1 ? { gap: 12 } : undefined}
       ListHeaderComponent={<>
         {modo === 'cliente' && <View style={styles.hero}>
-          <View style={styles.brandRow}><Text style={styles.brand}>Cine<Text style={{ color: colors.primary }}>App</Text></Text><Text style={styles.eyebrow}>EN CARTELERA</Text></View>
-          <Text style={styles.slogan}>Tu próxima{ '\n' }gran historia</Text>
+          <View style={styles.brandRow}><Text style={styles.brand}>CineApp</Text><Text style={styles.eyebrow}>EN CARTELERA</Text></View>
+          <Text style={styles.slogan}>Tu próxima gran historia</Text>
           <Text style={styles.subtitle}>Elige una película. Vive el cine.</Text>
         </View>}
         <Buscador valor={texto} onCambiar={setTexto} />
@@ -124,8 +124,8 @@ export default function PeliculasScreen({ modo: modoProp }: Props) {
 }
 const styles = StyleSheet.create({
   contenedor: { flex: 1, backgroundColor: colors.background }, lista: { paddingHorizontal: 16, paddingBottom: 24 },
-  hero: { paddingVertical: 18 }, brandRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }, brand: { color: colors.text, fontSize: 24, fontWeight: '800' },
-  eyebrow: { color: colors.muted, fontSize: 10, letterSpacing: 2 }, slogan: { color: colors.text, fontSize: 33, lineHeight: 38, fontWeight: '800', marginTop: 18 }, subtitle: { color: colors.muted, marginTop: 10, fontSize: 14 },
-  resultados: { color: colors.muted, marginVertical: 16, fontSize: 12 }, vacio: { color: colors.muted, textAlign: 'center', paddingVertical: 24 },
+  hero: { paddingTop: 10, paddingBottom: 12 }, brandRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }, brand: { color: colors.primary, fontSize: 22, fontWeight: '800' },
+  eyebrow: { color: colors.muted, fontSize: 10, letterSpacing: 2 }, slogan: { color: colors.text, fontSize: 24, lineHeight: 29, fontWeight: '800', marginTop: 10 }, subtitle: { color: colors.muted, marginTop: 5, fontSize: 12 },
+  resultados: { color: colors.muted, marginVertical: 10, fontSize: 12 }, vacio: { color: colors.muted, textAlign: 'center', paddingVertical: 24 },
   botonAgregar: { backgroundColor: colors.primary, borderRadius: 12, padding: 14, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 16 }, botonAgregarTexto: { color: colors.primaryText, fontWeight: '700' },
 });

@@ -17,8 +17,9 @@ export default function Buscador({ valor, onCambiar, placeholder }: Props) {
         style={styles.input}
         value={valor}
         onChangeText={onCambiar}
-        placeholder={placeholder ?? 'Buscar por nombre, género, clasificación o sala...'}
+        placeholder={placeholder ?? 'Buscar películas…'}
         placeholderTextColor={colors.muted}
+        accessibilityLabel="Buscar por nombre, género, clasificación o sala"
         autoCorrect={false}
       />
     </View>
@@ -28,7 +29,7 @@ export default function Buscador({ valor, onCambiar, placeholder }: Props) {
 const styles = StyleSheet.create({
   contenedor: {
     paddingHorizontal: 0,
-    paddingTop: 12,
+    paddingTop: 4,
   },
   input: {
     backgroundColor: colors.surface,
