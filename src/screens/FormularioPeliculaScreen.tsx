@@ -12,13 +12,16 @@ import { Pelicula, EstadoPelicula } from '../types/pelicula';
 import Select from '../ui/Select';
 import Icon from '../ui/Icon';
 import Poster from '../components/Poster';
-import { colors as c } from '../ui/theme';
+import { useTheme, Palette } from '../ui/theme';
 import { useDialog } from '../ui/Dialog';
 import { guardarPoster } from '../services/imagenes';
 import { guardarEstado } from '../redux/store';
 import { useSesionPersonal } from '../auth/SesionPersonal';
 
 export default function FormularioPeliculaScreen() {
+  const { colors: c } = useTheme();
+  const s = React.useMemo(() => makeStyles(c), [c]);
+
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<RouteProp<RootStackParamList, 'FormularioPelicula'>>();
   const peliculas = useAppSelector(s => s.peliculas.lista), salas = useAppSelector(s => s.salas.lista);
@@ -86,9 +89,12 @@ export default function FormularioPeliculaScreen() {
   </ScrollView>;
 }
 function Campo({ label, hint, ...props }: React.ComponentProps<typeof TextInput> & { label: string; hint?: string }) {
+  const { colors: c } = useTheme();
+  const s = React.useMemo(() => makeStyles(c), [c]);
+
   return <View style={s.field}><Text style={s.label}>{label}</Text><TextInput {...props} accessibilityLabel={label} placeholderTextColor={c.muted} selectionColor={c.primary} style={[s.input, props.editable === false && { opacity: 0.65 }]} />{!!hint && <Text style={s.hint}>{hint}</Text>}</View>;
 }
-const s = StyleSheet.create({ root: { flex: 1, backgroundColor: c.background }, content: { padding: 20, paddingBottom: 48 },
+const makeStyles = (c: Palette) => StyleSheet.create({ root: { flex: 1, backgroundColor: c.background }, content: { padding: 20, paddingBottom: 48 },
   eyebrow: { color: c.primary, fontSize: 10, letterSpacing: 2, marginBottom: 10 }, title: { color: c.text, fontSize: 28, fontWeight: '800' }, subtitle: { color: c.muted, lineHeight: 22, marginTop: 8, marginBottom: 24 },
   cover: { alignItems: 'center', backgroundColor: c.surface, borderRadius: 18, padding: 18, marginBottom: 24, borderWidth: 1, borderColor: c.border }, poster: { width: 160 },
   imageButton: { flexDirection: 'row', gap: 8, paddingVertical: 15, alignItems: 'center' }, imageText: { color: c.primary, fontWeight: '600', flexShrink: 1 }, remove: { padding: 8 },

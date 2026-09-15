@@ -1,5 +1,5 @@
 import Icon from '../ui/Icon';
-import { colors } from '../ui/theme';
+import { useTheme, Palette } from '../ui/theme';
 import React, { useMemo, useState } from 'react';
 import { View, FlatList, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { Text } from '../ui/Typography';
@@ -23,6 +23,9 @@ interface Props {
 }
 
 export default function PeliculasScreen({ modo: modoProp }: Props) {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   const Alert = useDialog();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<RouteProp<Record<string, { modo?: Modo }>, string>>();
@@ -122,7 +125,7 @@ export default function PeliculasScreen({ modo: modoProp }: Props) {
       </View>} />
   </View>;
 }
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) => StyleSheet.create({
   contenedor: { flex: 1, backgroundColor: colors.background }, lista: { paddingHorizontal: 16, paddingBottom: 24 },
   hero: { paddingTop: 10, paddingBottom: 12 }, brandRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }, brand: { color: colors.primary, fontSize: 22, fontWeight: '800' },
   eyebrow: { color: colors.muted, fontSize: 10, letterSpacing: 2 }, slogan: { color: colors.text, fontSize: 24, lineHeight: 29, fontWeight: '800', marginTop: 10 }, subtitle: { color: colors.muted, marginTop: 5, fontSize: 12 },

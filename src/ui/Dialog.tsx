@@ -1,10 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet, ScrollView, AlertButton, AppState } from 'react-native';
 import Icon from './Icon';
-import { colors as c } from './theme';
+import { useTheme, Palette } from './theme';
 interface Aviso { title: string; message: string; buttons: AlertButton[] }
 const Context = createContext<{ alert: (title: string, message?: string, buttons?: AlertButton[]) => void }>({ alert: () => {} });
 export function DialogProvider({ children }: { children: React.ReactNode }) {
+  const { colors: c } = useTheme();
+  const s = React.useMemo(() => makeStyles(c), [c]);
+
   const [aviso, setAviso] = useState<Aviso | null>(null);
   useEffect(() => {
     const sub = AppState.addEventListener('change', state => { if (state === 'background') setAviso(null); });
@@ -28,7 +31,7 @@ export function DialogProvider({ children }: { children: React.ReactNode }) {
   </Context.Provider>;
 }
 export const useDialog = () => useContext(Context);
-const s = StyleSheet.create({
+const makeStyles = (c: Palette) => StyleSheet.create({
   overlay: { flex: 1, backgroundColor: '#000000BB', alignItems: 'center', justifyContent: 'center', padding: 24 },
   card: { width: '100%', maxWidth: 420, maxHeight: '85%', borderRadius: 24, backgroundColor: c.surface, padding: 24, borderWidth: 1, borderColor: c.border },
   icon: { alignSelf: 'flex-start', backgroundColor: c.raised, padding: 12, borderRadius: 18, marginBottom: 16 },

@@ -24,7 +24,7 @@ const persistConfig = {
   migrate: createMigrate(migraciones),
   storage: almacenamiento,
   // Persistimos TODO el estado global de la app (obligatorio según indicaciones).
-  whitelist: ['peliculas', 'reservas', 'salas'],
+  whitelist: ['peliculas', 'reservas', 'salas', 'preferencias'],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

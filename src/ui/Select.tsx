@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { Modal, View, Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
 import Icon from './Icon';
-import { colors as c } from './theme';
+import { useTheme, Palette } from './theme';
 export interface Option { label: string; value: string }
 export default function Select({ label, value, options, onChange, hint }: { label: string; value: string; options: Option[]; onChange: (value: string) => void; hint?: string }) {
+  const { colors: c } = useTheme();
+  const s = React.useMemo(() => makeStyles(c), [c]);
+
   const [open, setOpen] = useState(false);
   return <View style={s.field}>
     <Text style={s.label}>{label}</Text>
@@ -21,7 +24,7 @@ export default function Select({ label, value, options, onChange, hint }: { labe
     </Modal>
   </View>;
 }
-const s = StyleSheet.create({
+const makeStyles = (c: Palette) => StyleSheet.create({
   field: { marginBottom: 18 }, label: { color: c.text, fontSize: 14, fontWeight: '600', marginBottom: 8 },
   input: { padding: 14, minHeight: 52, backgroundColor: c.surface, borderWidth: 1, borderColor: c.border, borderRadius: 12, flexDirection: 'row', alignItems: 'center', gap: 12 },
   value: { color: c.text, fontSize: 16, flex: 1 }, hint: { color: c.muted, fontSize: 12, lineHeight: 18, marginTop: 6 },

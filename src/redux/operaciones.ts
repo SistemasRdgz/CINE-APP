@@ -3,7 +3,8 @@ import type { RootState } from './store';
 import type { Reserva } from '../types/reserva';
 import type { Funcion } from '../types/sala';
 import { agregarReserva, marcarBoletoUsado } from './slices/reservasSlice';
-import { agregarFuncion } from './slices/salasSlice';
+import { errorDatosSala, errorEliminarSala, DatosSala } from '../domain/salas';
+import { agregarFuncion, agregarSala, editarSala, eliminarSala } from './slices/salasSlice';
 import { errorCompra, errorFuncion, leerQR } from '../domain/cine';
 
 type Resultado = { ok: true; mensaje: string } | { ok: false; mensaje: string };
@@ -28,4 +29,17 @@ export const validarQR = (data: string): Operacion => (dispatch, getState) => {
   if (reserva.usado) return { ok: false, mensaje: 'Este boleto ya fue utilizado. No se permite otro ingreso.' };
   dispatch(marcarBoletoUsado({ id, fechaUso: new Date().toISOString() }));
   return { ok: true, mensaje: `${reserva.peliculaNombre}\n${reserva.salaNombre} · ${reserva.fecha} ${reserva.hora}\nAsientos: ${reserva.asientos.join(', ')}\n${reserva.cantidadBoletos} entrada(s) validada(s).` };
+};
+
+export const guardarSala = (datos: DatosSala, editando: boolean): Operacion => (dispatch, getState) => {
+  const error = errorDatosSala(datos, getState().salas.lista, editando);
+  if (error) return { ok: false, mensaje: error };
+  dispatch(editando ? editarSala(datos) : agregarSala(datos));
+  return { ok: true, mensaje: editando ? 'Sala actualizada.' : 'Sala creada. Ya puedes asignarla a una película.' };
+};
+export const borrarSala = (id: string): Operacion => (dispatch, getState) => {
+  const error = errorEliminarSala(id, getState());
+  if (error) return { ok: false, mensaje: error };
+  dispatch(eliminarSala(id));
+  return { ok: true, mensaje: 'Sala eliminada.' };
 };

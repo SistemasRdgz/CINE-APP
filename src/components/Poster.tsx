@@ -3,9 +3,12 @@ import { Image, View, Text, StyleSheet } from 'react-native';
 import Svg, { Defs, LinearGradient, Stop, Rect, Circle, Path } from 'react-native-svg';
 import Icon from '../ui/Icon';
 import { uriPoster } from '../services/imagenes';
-import { colors as c } from '../ui/theme';
+import { useTheme, Palette } from '../ui/theme';
 // Portada vectorial local por género para películas sin fotografía.
 export default function Poster({ nombre, genero, imagen, preview }: { nombre: string; genero: string; imagen?: string; preview?: string }) {
+  const { colors: c } = useTheme();
+  const s = React.useMemo(() => makeStyles(c), [c]);
+
   const uri = preview ?? uriPoster(imagen);
   const [fallo, setFallo] = useState(false);
   useEffect(() => setFallo(false), [uri]);
@@ -20,11 +23,11 @@ export default function Poster({ nombre, genero, imagen, preview }: { nombre: st
         <Path d="M0 345 Q100 240 165 330 T300 300 V450 H0Z" fill={alegre ? '#452035' : '#0D202F'} />
         <Rect x="18" y="18" width="264" height="414" rx="4" fill="none" stroke="#D9B776" strokeOpacity={0.4} />
       </Svg>
-      <View style={s.overlay}><View style={s.brand}><Icon name="movie-open-outline" size={20} /><Text style={s.brandText}>CINEAPP</Text></View><Text style={s.name} numberOfLines={4}>{nombre || 'Tu próxima historia'}</Text><Text style={s.genre}>{genero || 'CINE'}</Text></View>
+      <View style={s.overlay}><View style={s.brand}><Icon name="movie-open-outline" size={20} color="#D9B776" /><Text style={s.brandText}>CINEAPP</Text></View><Text style={s.name} numberOfLines={4}>{nombre || 'Tu próxima historia'}</Text><Text style={s.genre}>{genero || 'CINE'}</Text></View>
     </>}
   </View>;
 }
-const s = StyleSheet.create({ root: { width: '100%', aspectRatio: 2 / 3, backgroundColor: c.raised, overflow: 'hidden', borderRadius: 14 }, image: { width: '100%', height: '100%' },
-  overlay: { ...StyleSheet.absoluteFillObject, padding: 20, justifyContent: 'flex-end' }, brand: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 12 }, brandText: { color: c.primary, fontSize: 10, letterSpacing: 2 },
-  name: { color: c.text, fontSize: 23, fontWeight: '800', lineHeight: 27 }, genre: { color: c.primary, textTransform: 'uppercase', letterSpacing: 2, fontSize: 10, marginTop: 12 },
+const makeStyles = (c: Palette) => StyleSheet.create({ root: { width: '100%', aspectRatio: 2 / 3, backgroundColor: c.raised, overflow: 'hidden', borderRadius: 14 }, image: { width: '100%', height: '100%' },
+  overlay: { ...StyleSheet.absoluteFillObject, padding: 20, justifyContent: 'flex-end' }, brand: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 12 }, brandText: { color: '#D9B776', fontSize: 10, letterSpacing: 2 },
+  name: { color: '#F5F1EA', fontSize: 23, fontWeight: '800', lineHeight: 27 }, genre: { color: '#D9B776', textTransform: 'uppercase', letterSpacing: 2, fontSize: 10, marginTop: 12 },
 });

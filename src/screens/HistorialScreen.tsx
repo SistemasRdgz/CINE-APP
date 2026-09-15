@@ -1,4 +1,4 @@
-import { colors } from '../ui/theme';
+import { useTheme, Palette } from '../ui/theme';
 import React from 'react';
 import BoletoQR from '../components/BoletoQR';
 import { View, FlatList, StyleSheet } from 'react-native';
@@ -7,6 +7,9 @@ import { Text } from '../ui/Typography';
 import { useAppSelector } from '../redux/hooks';
 
 export default function HistorialScreen() {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   const reservas = useAppSelector((state) => state.reservas.lista);
   const ordenadas = [...reservas].sort(
     (a, b) => new Date(b.fechaCompra).getTime() - new Date(a.fechaCompra).getTime()
@@ -48,7 +51,7 @@ export default function HistorialScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) => StyleSheet.create({
   contenedor: { flex: 1, backgroundColor: colors.background },
   vacio: { textAlign: 'center', color: colors.muted, marginTop: 40 },
   card: {

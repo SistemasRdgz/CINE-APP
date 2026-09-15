@@ -1,11 +1,13 @@
+import ThemeToggle from '../ui/ThemeToggle';
+import SalasScreen from '../screens/SalasScreen';
 import Icon from '../ui/Icon';
-import { colors } from '../ui/theme';
+import { useTheme, Palette } from '../ui/theme';
 import React from 'react';
 import { useSesionPersonal } from '../auth/SesionPersonal';
 import FuncionesScreen from '../screens/FuncionesScreen';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
@@ -24,6 +26,9 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<ClienteTabsParamList>();
 
 function BotonAccesoPersonal() {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   return (
     <TouchableOpacity
@@ -40,8 +45,11 @@ function CatalogoScreen() {
 }
 
 function ClienteTabs() {
+  const { colors } = useTheme();
+
   return (
     <Tab.Navigator screenOptions={({ route }) => ({
+      headerRight: () => <ThemeToggle />,
       headerShown: true, headerStyle: { backgroundColor: colors.background }, headerTintColor: colors.text,
       tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
       tabBarActiveTintColor: colors.primary, tabBarInactiveTintColor: colors.muted,
@@ -53,7 +61,7 @@ function ClienteTabs() {
         component={CatalogoScreen}
         options={{
           title: 'Cartelera',
-          headerRight: () => <BotonAccesoPersonal />,
+          headerRight: () => <View style={{ flexDirection: 'row', alignItems: 'center' }}><ThemeToggle /><BotonAccesoPersonal /></View>,
         }}
       />
       <Tab.Screen
@@ -70,9 +78,11 @@ function PersonalPeliculasScreen() {
 }
 
 export default function AppNavigator() {
+  const { colors } = useTheme();
+
   const { autorizado } = useSesionPersonal();
   return (
-    <Stack.Navigator initialRouteName="ClienteTabs" screenOptions={{ headerStyle: { backgroundColor: colors.background }, headerTintColor: colors.text, contentStyle: { backgroundColor: colors.background } }}>
+    <Stack.Navigator initialRouteName="ClienteTabs" screenOptions={{ headerRight: () => <ThemeToggle />, headerStyle: { backgroundColor: colors.background }, headerTintColor: colors.text, contentStyle: { backgroundColor: colors.background } }}>
       {!autorizado ? <Stack.Group navigationKey="cliente">
       <Stack.Screen
         name="ClienteTabs"
@@ -112,13 +122,14 @@ export default function AppNavigator() {
       />
       <Stack.Screen name="Dashboard" component={DashboardScreen} options={{ title: 'Dashboard' }} />
       <Stack.Screen name="Escaner" component={EscanerScreen} options={{ title: 'Escáner QR' }} />
+      <Stack.Screen name="Salas" component={SalasScreen} options={{ title: 'Gestión de salas' }} />
       <Stack.Screen name="Funciones" component={FuncionesScreen} options={{ title: 'Gestión de funciones' }} />
       </Stack.Group>}
     </Stack.Navigator>
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) => StyleSheet.create({
   botonDiscreto: { flexDirection: 'row', alignItems: 'center', gap: 6, marginRight: 12, paddingHorizontal: 8, paddingVertical: 4 },
   botonDiscretoTexto: { color: colors.primary, fontSize: 13, fontWeight: '600' },
 });

@@ -5,14 +5,18 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSesionPersonal } from '../auth/SesionPersonal';
 import { RootStackParamList } from '../navigation/types';
 import Icon, { IconName } from '../ui/Icon';
-import { colors as c } from '../ui/theme';
+import { useTheme, Palette } from '../ui/theme';
 export default function PersonalHomeScreen() {
+  const { colors: c } = useTheme();
+  const s = React.useMemo(() => makeStyles(c), [c]);
+
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { salir } = useSesionPersonal();
-  const items: { route: 'PersonalPeliculas' | 'Dashboard' | 'Escaner' | 'Funciones'; name: string; description: string; icon: IconName }[] = [
+  const items: { route: 'PersonalPeliculas' | 'Dashboard' | 'Escaner' | 'Funciones' | 'Salas'; name: string; description: string; icon: IconName }[] = [
     { route: 'PersonalPeliculas', name: 'Películas', description: 'Gestiona tu cartelera y sus portadas', icon: 'movie-open-outline' },
     { route: 'Dashboard', name: 'Dashboard', description: 'Ventas, ocupación e ingresos', icon: 'view-dashboard-outline' },
     { route: 'Escaner', name: 'Validar boletos', description: 'Escanea un QR para registrar el ingreso', icon: 'qrcode-scan' },
+    { route: 'Salas', name: 'Gestión de salas', description: 'Salas, filas y capacidad del cine', icon: 'theater' },
     { route: 'Funciones', name: 'Funciones y horarios', description: 'Programa la próxima experiencia', icon: 'calendar-clock-outline' },
   ];
   return <ScrollView style={s.root} contentContainerStyle={s.content}>
@@ -22,7 +26,7 @@ export default function PersonalHomeScreen() {
     <TouchableOpacity style={s.exit} onPress={salir}><Icon name="logout" size={20} color={c.danger} /><Text style={s.exitText}>Salir de la Zona de Personal</Text></TouchableOpacity>
   </ScrollView>;
 }
-const s = StyleSheet.create({ root: { flex: 1, backgroundColor: c.background }, content: { padding: 20, paddingBottom: 40 },
+const makeStyles = (c: Palette) => StyleSheet.create({ root: { flex: 1, backgroundColor: c.background }, content: { padding: 20, paddingBottom: 40 },
   verified: { flexDirection: 'row', gap: 7, alignItems: 'center', marginBottom: 16 }, verifiedText: { color: c.primary, fontSize: 10, letterSpacing: 2 },
   title: { color: c.text, fontSize: 29, lineHeight: 35, fontWeight: '800', marginBottom: 10 }, subtitle: { color: c.muted, lineHeight: 22, marginBottom: 28 },
   card: { backgroundColor: c.surface, borderWidth: 1, borderColor: c.border, padding: 16, borderRadius: 16, marginBottom: 12, flexDirection: 'row', alignItems: 'center', gap: 14 },

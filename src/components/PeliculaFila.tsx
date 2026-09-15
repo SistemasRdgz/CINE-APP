@@ -3,9 +3,12 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Pelicula } from '../types/pelicula';
 import Poster from './Poster';
 import Icon from '../ui/Icon';
-import { colors as c } from '../ui/theme';
+import { useTheme, Palette } from '../ui/theme';
 interface Props { pelicula: Pelicula; modo: 'cliente' | 'personal'; onReservar?: () => void; onEditar?: () => void; onEliminar?: () => void; onToggleEstado?: () => void }
 export default function PeliculaFila({ pelicula: p, modo, onReservar, onEditar, onEliminar, onToggleEstado }: Props) {
+  const { colors: c } = useTheme();
+  const s = React.useMemo(() => makeStyles(c), [c]);
+
   const disponible = p.estado === 'Disponible';
   return <View style={s.card}>
     <Poster nombre={p.nombre} genero={p.genero} imagen={p.imagen} />
@@ -25,7 +28,7 @@ export default function PeliculaFila({ pelicula: p, modo, onReservar, onEditar, 
     </View>
   </View>;
 }
-const s = StyleSheet.create({ card: { flex: 1, backgroundColor: c.surface, borderRadius: 16, overflow: 'hidden', borderWidth: 1, borderColor: c.border }, body: { padding: 12 },
+const makeStyles = (c: Palette) => StyleSheet.create({ card: { flex: 1, backgroundColor: c.surface, borderRadius: 16, overflow: 'hidden', borderWidth: 1, borderColor: c.border }, body: { padding: 12 },
   name: { color: c.text, fontSize: 16, lineHeight: 21, fontWeight: '700', marginBottom: 6 }, detail: { color: c.muted, fontSize: 12, lineHeight: 19 },
   priceRow: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginVertical: 10 }, price: { color: c.primary, fontSize: 19, fontWeight: '700' }, status: { color: c.success, fontSize: 10 },
   book: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: c.primary, borderRadius: 10, paddingVertical: 12 }, bookText: { color: c.primaryText, fontWeight: '700' },

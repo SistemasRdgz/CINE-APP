@@ -1,4 +1,4 @@
-import { colors } from '../ui/theme';
+import { useTheme, Palette } from '../ui/theme';
 import React from 'react';
 import { View, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { Text } from '../ui/Typography';
@@ -16,6 +16,9 @@ interface Props {
 }
 
 export default function Filtros({ grupos }: Props) {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   return (
     <View style={styles.contenedor}>
       {grupos.map((grupo) => (
@@ -60,7 +63,7 @@ export default function Filtros({ grupos }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) => StyleSheet.create({
   contenedor: {
     paddingHorizontal: 0,
     paddingTop: 8,

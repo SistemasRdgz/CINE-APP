@@ -1,5 +1,5 @@
 import Icon from '../ui/Icon';
-import { colors } from '../ui/theme';
+import { useTheme, Palette } from '../ui/theme';
 import React, { useState } from 'react';
 import { View, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { Text } from '../ui/Typography';
@@ -8,6 +8,9 @@ import * as LocalAuthentication from 'expo-local-authentication';
 import { useSesionPersonal } from '../auth/SesionPersonal';
 
 export default function AccesoPersonalScreen() {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   const { entrar } = useSesionPersonal();
   const [verificando, setVerificando] = useState(false);
   const [mensaje, setMensaje] = useState('');
@@ -75,7 +78,7 @@ export default function AccesoPersonalScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) => StyleSheet.create({
   contenedor: {
     flex: 1,
     backgroundColor: colors.surface,

@@ -1,7 +1,7 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Select from '../ui/Select';
 import Icon from '../ui/Icon';
-import { colors } from '../ui/theme';
+import { useTheme, Palette } from '../ui/theme';
 import React, { useState } from 'react';
 import { ScrollView, View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Text } from '../ui/Typography';
@@ -13,6 +13,9 @@ import { fechaLocal } from '../domain/cine';
 import { nanoid } from '@reduxjs/toolkit';
 
 export default function FuncionesScreen() {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   const Alert = useDialog();
   const peliculas = useAppSelector(s => s.peliculas.lista);
   const salas = useAppSelector(s => s.salas.lista);
@@ -55,7 +58,7 @@ export default function FuncionesScreen() {
     <Text style={styles.text}>Las funciones con ventas se conservan para mantener el historial y las estadísticas.</Text>
   </ScrollView>;
 }
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) => StyleSheet.create({
   picker: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, borderRadius: 12, padding: 16, marginBottom: 14 },
   pickerText: { flex: 1, color: colors.text, fontSize: 16 },
   root: { flex: 1, backgroundColor: colors.background }, content: { padding: 16, paddingBottom: 40 },

@@ -1,4 +1,4 @@
-import { colors } from '../ui/theme';
+import { useTheme, Palette } from '../ui/theme';
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { TextInput } from '../ui/Typography';
@@ -11,6 +11,9 @@ interface Props {
 }
 
 export default function Buscador({ valor, onCambiar, placeholder }: Props) {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   return (
     <View style={styles.contenedor}>
       <TextInput
@@ -26,7 +29,7 @@ export default function Buscador({ valor, onCambiar, placeholder }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) => StyleSheet.create({
   contenedor: {
     paddingHorizontal: 0,
     paddingTop: 4,

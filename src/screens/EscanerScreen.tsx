@@ -1,4 +1,4 @@
-import { colors } from '../ui/theme';
+import { useTheme, Palette } from '../ui/theme';
 import React, { useRef, useState } from 'react';
 import { View, TouchableOpacity, StyleSheet, Linking, ActivityIndicator } from 'react-native';
 import { Text } from '../ui/Typography';
@@ -10,6 +10,9 @@ import { validarQR } from '../redux/operaciones';
 import { guardarEstado } from '../redux/store';
 
 export default function EscanerScreen() {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   const [permission, requestPermission] = useCameraPermissions();
   const focused = useIsFocused();
   const dispatch = useAppDispatch();
@@ -64,7 +67,7 @@ export default function EscanerScreen() {
     </View> : focused && <CameraView style={styles.camera} facing="back" barcodeScannerSettings={{ barcodeTypes: ['qr'] }} onBarcodeScanned={escanear} onMountError={() => setErrorCamara('No se pudo abrir la cámara. Comprueba que ninguna otra app la esté usando.')} />}
   </View>;
 }
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) => StyleSheet.create({
   root: { flex: 1, padding: 16, backgroundColor: colors.background }, center: { flex: 1, padding: 24, justifyContent: 'center' },
   title: { fontSize: 21, fontWeight: '700', color: colors.primary, marginBottom: 12 },
   text: { fontSize: 15, lineHeight: 23, color: colors.text, marginBottom: 16 },

@@ -1,4 +1,4 @@
-import { colors } from '../ui/theme';
+import { useTheme, Palette } from '../ui/theme';
 import React, { useMemo, useState } from 'react';
 import { View, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { Text } from '../ui/Typography';
@@ -13,6 +13,9 @@ import { RootStackParamList } from '../navigation/types';
 import { obtenerAsientosOcupados } from '../redux/slices/reservasSlice';
 
 export default function ReservaScreen() {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   const Alert = useDialog();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<RouteProp<RootStackParamList, 'Reserva'>>();
@@ -143,7 +146,7 @@ export default function ReservaScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) => StyleSheet.create({
   contenedor: { flex: 1, backgroundColor: colors.surface, padding: 16 },
   titulo: { fontSize: 20, fontWeight: '700' },
   subtitulo: { fontSize: 13, color: colors.muted, marginBottom: 12 },

@@ -8,9 +8,12 @@ import { estadisticas } from '../domain/cine';
 import type { RootState } from '../redux/store';
 import type { RootStackParamList } from '../navigation/types';
 import Icon, { IconName } from '../ui/Icon';
-import { colors as c } from '../ui/theme';
+import { useTheme, Palette } from '../ui/theme';
 const seleccionar = createSelector([(s: RootState) => s], estadisticas);
 export default function DashboardScreen() {
+  const { colors: c } = useTheme();
+  const s = React.useMemo(() => makeStyles(c), [c]);
+
   const stats = useAppSelector(seleccionar);
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const items: { label: string; value: number; icon: IconName }[] = [
@@ -31,7 +34,7 @@ export default function DashboardScreen() {
     <Text style={s.note}>Acumulado local. La capacidad se suma por función. Los boletos utilizados siguen contando como ventas y asientos ocupados.</Text>
   </ScrollView>;
 }
-const s = StyleSheet.create({ root: { flex: 1, backgroundColor: c.background }, content: { padding: 20, paddingBottom: 36 }, eyebrow: { color: c.primary, letterSpacing: 2, fontSize: 10 }, title: { color: c.text, fontSize: 30, fontWeight: '800', marginTop: 10 }, subtitle: { color: c.muted, marginTop: 8, marginBottom: 24 },
+const makeStyles = (c: Palette) => StyleSheet.create({ root: { flex: 1, backgroundColor: c.background }, content: { padding: 20, paddingBottom: 36 }, eyebrow: { color: c.primary, letterSpacing: 2, fontSize: 10 }, title: { color: c.text, fontSize: 30, fontWeight: '800', marginTop: 10 }, subtitle: { color: c.muted, marginTop: 8, marginBottom: 24 },
   revenue: { backgroundColor: c.wineSoft, borderWidth: 1, borderColor: c.wine, borderRadius: 18, padding: 22, flexDirection: 'row', alignItems: 'center', gap: 20, marginBottom: 16 }, amount: { color: c.text, fontSize: 36, fontWeight: '800', marginTop: 6 }, label: { color: c.muted, fontSize: 13, lineHeight: 19 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 }, card: { flexBasis: '44%', flexGrow: 1, padding: 18, borderWidth: 1, borderColor: c.border, borderRadius: 16, backgroundColor: c.surface }, value: { color: c.text, fontSize: 28, fontWeight: '700', marginVertical: 6 },
   available: { backgroundColor: c.surface, borderWidth: 1, borderColor: c.border, padding: 18, borderRadius: 16, flexDirection: 'row', gap: 18, alignItems: 'center', marginTop: 12 }, feature: { flexDirection: 'row', gap: 14, padding: 20, borderRadius: 16, backgroundColor: c.raised, marginTop: 16 }, best: { color: c.text, fontSize: 19, fontWeight: '700', lineHeight: 25, marginVertical: 8 }, gold: { color: c.primary, fontSize: 13 },

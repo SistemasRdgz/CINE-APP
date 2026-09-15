@@ -1,5 +1,5 @@
 import Icon from '../ui/Icon';
-import { colors } from '../ui/theme';
+import { useTheme, Palette } from '../ui/theme';
 import React, { useMemo, useState, useRef } from 'react';
 import { View, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { Text, TextInput } from '../ui/Typography';
@@ -22,6 +22,9 @@ function generarCodigoReserva(): string {
 }
 
 export default function MapaAsientosScreen() {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   const Alert = useDialog();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<RouteProp<RootStackParamList, 'MapaAsientos'>>();
@@ -170,6 +173,9 @@ export default function MapaAsientosScreen() {
 }
 
 function Leyenda({ color, texto }: { color: string; texto: string }) {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   return (
     <View style={styles.leyendaItem}>
       <Icon name={texto === 'Ocupado' ? 'close' : 'seat-outline'} color={color} size={17} />
@@ -178,7 +184,7 @@ function Leyenda({ color, texto }: { color: string; texto: string }) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) => StyleSheet.create({
   contenedor: { flex: 1, backgroundColor: colors.surface },
   vacio: { color: colors.muted, textAlign: 'center', marginTop: 40 },
   titulo: { fontSize: 18, fontWeight: '700' },
