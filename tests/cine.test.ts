@@ -1,3 +1,6 @@
+import { migraciones } from '../src/redux/migraciones';
+import { ampliarSala } from '../src/domain/salas';
+import { sugerirCodigo } from '../src/domain/catalogo';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { configureStore } from '@reduxjs/toolkit';
@@ -8,7 +11,7 @@ import { agregarPelicula, eliminarPelicula, toggleEstadoPelicula } from '../src/
 import { agregarFuncion } from '../src/redux/slices/salasSlice';
 import { contenidoQR, leerQR, estadisticas, errorPelicula, fechaValida } from '../src/domain/cine';
 import { almacenamientoRecuperable } from '../src/redux/almacenamiento';
-import { persistReducer, persistStore } from 'redux-persist';
+import { createMigrate, persistReducer, persistStore } from 'redux-persist';
 import type { Reserva } from '../src/types/reserva';
 
 const pelicula = { codigo: 'P1', nombre: 'Prueba', genero: 'Drama', duracion: 90, clasificacion: 'A', salaAsignada: 'S1', precio: 4.5, estado: 'Disponible' as const };
@@ -109,4 +112,34 @@ test('escritura fallida se reintenta con el último estado sin otra venta', asyn
   await assert.rejects(adapter.verificar());
   falla = false; await adapter.verificar();
   assert.equal(guardado, 'estado2');
+});
+
+test('ampliar la sala conserva funciones y los asientos que ya estaban ocupados', async () => {
+  const s = crearStore(); s.dispatch(comprar(reserva()));
+  const anterior = s.getState();
+  const ampliada = { ...anterior, salas: { lista: anterior.salas.lista.map(ampliarSala) } };
+  assert.equal(ampliada.salas.lista[0].filas.length, 8);
+  assert.equal(ampliada.salas.lista[0].columnas, 10);
+  assert.deepEqual(ampliada.salas.lista[0].funciones, anterior.salas.lista[0].funciones);
+  assert.deepEqual(ampliada.reservas.lista[0].asientos, ['A1', 'A2']);
+  assert.equal(estadisticas(ampliada).disponibles, 78);
+  assert.deepEqual(ampliarSala(ampliada.salas.lista[0]), ampliada.salas.lista[0]);
+});
+test('el código sugerido evita colisiones sin distinguir mayúsculas o espacios', async () => {
+  assert.equal(sugerirCodigo(['COD001', ' cod002 ', 'COD004']), 'COD003');
+});
+
+
+test('migración real desde versión anterior conserva catálogo y boleto usado', async () => {
+  const s = crearStore();
+  s.dispatch(comprar(reserva()));
+  s.dispatch(validarQR(contenidoQR('BOL-ABC123')));
+  const anterior = { ...s.getState(), _persist: { version: -1, rehydrated: true } };
+  const resultado = await createMigrate(migraciones)(anterior, 1) as typeof anterior;
+  assert.deepEqual(resultado.reservas, anterior.reservas);
+  assert.deepEqual(resultado.peliculas, anterior.peliculas);
+  assert.equal(resultado.salas.lista[0].columnas, 10);
+  assert.equal(resultado.salas.lista[0].filas.length, 8);
+  assert.equal(resultado.reservas.lista[0].usado, true);
+  assert.deepEqual(await createMigrate(migraciones)({ ...resultado, _persist: { version: 1, rehydrated: true } }, 1), { ...resultado, _persist: { version: 1, rehydrated: true } });
 });

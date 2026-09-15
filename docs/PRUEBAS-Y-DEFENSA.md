@@ -29,7 +29,7 @@ Las comprobaciones automáticas verifican reglas de negocio y TypeScript. Antes 
 
 1. En Personal agrega `DEMO01`, nombre `Película de defensa`, género Drama, duración 90, clasificación A, Sala 1 y precio $4.50.
 2. Registra una función futura; por ejemplo mañana a las 19:00. Intenta repetir sala/fecha/hora y comprueba el mensaje de rechazo.
-3. Anota los valores iniciales del dashboard. Al agregar la película y función: +1 película, +1 función y +20 lugares disponibles (Sala 1 tiene 20 asientos).
+3. Anota los valores iniciales del dashboard. Al agregar la película y función: +1 película, +1 función y +80 lugares disponibles (Sala 1 tiene 80 asientos).
 4. Sal de Personal. Busca `defensa`, selecciona esa función y compra 2 entradas, A1 y A2, a nombre de Daniel. Total: $9.00.
 5. Intenta pulsar Confirmar rápidamente varias veces: debe existir una única reserva.
 6. Vuelve a esa misma función: A1 y A2 deben estar ocupados; otros asientos siguen libres.
@@ -68,3 +68,21 @@ Las comprobaciones automáticas verifican reglas de negocio y TypeScript. Antes 
 ## Límite intencional del desafío
 
 La base es local, sin servidor. La biometría valida al usuario del dispositivo; no hay cuentas de empleados ni una base compartida entre teléfonos. La defensa debe usar el mismo almacenamiento para compra y validación. Un despliegue real de cine requeriría un diseño distinto, fuera de esta consigna.
+
+
+## Pruebas adicionales del rediseño
+
+- Al actualizar sin borrar datos, las reservas previas y los boletos usados deben seguir presentes. Cada función de S1/S2 ahora aporta 80 lugares; el dashboard aumenta capacidad, no ingresos.
+- Cartelera conserva filtros por género, clasificación, sala y estado, y la búsqueda dinámica.
+- Comprobar íconos de Cartelera, Mis Boletos y todas las opciones de Personal.
+- Agregar una película y elegir fotografía: al volver de la galería, conservar los demás datos del formulario.
+- Cancelar el selector de imágenes: conservar la imagen anterior.
+- Guardar, cerrar y reabrir: mostrar el mismo póster. Editar y reemplazarlo; probar también «Usar portada predeterminada».
+- Los géneros y clasificaciones se seleccionan, no se escriben. Comprobar código sugerido y validación de código repetido.
+- Elegir fecha con calendario y hora con reloj. Cancelar cualquiera mantiene el valor anterior; un horario repetido sigue rechazándose.
+- El mapa debe mostrar 8 filas verticales y 10 asientos por fila, separados por un pasillo. Deslizar horizontalmente debe permitir llegar a la columna 10, y verticalmente a la fila H.
+- Probar la compra y lectura QR de un asiento nuevo, por ejemplo H10, además de los asientos anteriores.
+- Confirmación de compra, eliminación y avisos deben usar los diálogos oscuros. Cancelar eliminación no debe modificar datos.
+- Desde una pantalla administrativa, pulsar Inicio y regresar debe pedir huella otra vez. La excepción temporal corresponde únicamente al selector de imágenes abierto por la app.
+
+Las pruebas automáticas no sustituyen estas comprobaciones visuales y de hardware en Android.

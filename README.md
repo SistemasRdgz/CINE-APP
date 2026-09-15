@@ -25,6 +25,18 @@ npx expo run:android
 
 Esto genera y compila un proyecto Android nativo local. No se requiere un backend. El servidor de desarrollo entrega el código de la app, no almacena las ventas.
 
+## Diseño y experiencia
+
+La interfaz usa carbón, vino, dorado y marfil. La cartelera conserva los filtros originales e incorpora CineApp, el eslogan «Tu próxima gran historia» y tarjetas con portadas. Los íconos de la aplicación usan MaterialCommunityIcons; no hay emojis en las pantallas.
+
+Al crear o editar una película se puede elegir una imagen de la galería. Se copia al directorio privado de la app (`posters/`) y Redux guarda su nombre relativo. La imagen continúa disponible si se elimina el original de la galería. Si no hay imagen, se muestra una portada vectorial local. No se descargan pósters de servidores externos.
+
+El formulario sugiere un código libre y ofrece listas de género, clasificación, sala y estado. Las funciones usan calendario y reloj nativos. Los diálogos de información y confirmación usan el tema propio; los permisos y la autenticación mantienen el control del sistema operativo.
+
+Las salas S1 y S2 se amplían a **8 filas (A-H) por 10 columnas: 80 asientos por función**. La migración de Redux Persist conserva películas, funciones, reservas y estados de uso. Por ello cambian los contadores de capacidad, no las ventas. El mapa muestra las filas apiladas, un pasillo después de la columna 5 y desplazamiento horizontal.
+
+Abrir el selector de imágenes conserva temporalmente el formulario. Salir normalmente de la aplicación sigue bloqueando la zona de personal.
+
 ## Flujos
 
 **Cliente:** cartelera → función → cantidad → asientos → datos del cliente → confirmar → Mis Boletos. Solo se ofrecen películas disponibles y funciones futuras. Se comprueba de nuevo el estado actual de Redux al confirmar.
