@@ -1,5 +1,8 @@
+import { useTheme, Palette } from '../ui/theme';
 import React from 'react';
-import { View, TextInput, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { TextInput } from '../ui/Typography';
+
 
 interface Props {
   valor: string;
@@ -8,30 +11,34 @@ interface Props {
 }
 
 export default function Buscador({ valor, onCambiar, placeholder }: Props) {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   return (
     <View style={styles.contenedor}>
       <TextInput
         style={styles.input}
         value={valor}
         onChangeText={onCambiar}
-        placeholder={placeholder ?? 'Buscar por nombre, género, clasificación o sala...'}
-        placeholderTextColor="#888"
+        placeholder={placeholder ?? 'Buscar películas…'}
+        placeholderTextColor={colors.muted}
+        accessibilityLabel="Buscar por nombre, género, clasificación o sala"
         autoCorrect={false}
       />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) => StyleSheet.create({
   contenedor: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
+    paddingHorizontal: 0,
+    paddingTop: 4,
   },
   input: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: colors.border,
     paddingHorizontal: 14,
     paddingVertical: 10,
     fontSize: 15,

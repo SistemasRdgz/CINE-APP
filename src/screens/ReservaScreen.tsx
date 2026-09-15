@@ -1,13 +1,22 @@
+import { useTheme, Palette } from '../ui/theme';
 import React, { useMemo, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { Text } from '../ui/Typography';
+import { useDialog } from '../ui/Dialog';
+
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
+import { funcionFutura } from '../domain/cine';
 import { useAppSelector } from '../redux/hooks';
 import { RootStackParamList } from '../navigation/types';
 import { obtenerAsientosOcupados } from '../redux/slices/reservasSlice';
 
 export default function ReservaScreen() {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
+  const Alert = useDialog();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<RouteProp<RootStackParamList, 'Reserva'>>();
   const { peliculaCodigo } = route.params;
@@ -21,7 +30,7 @@ export default function ReservaScreen() {
   const funciones = useMemo(() => {
     return salas.flatMap((s) =>
       s.funciones
-        .filter((f) => f.peliculaCodigo === peliculaCodigo)
+        .filter((f) => f.peliculaCodigo === peliculaCodigo && funcionFutura(f))
         .map((f) => ({ ...f, salaNombre: s.nombre, totalAsientos: s.filas.length * s.columnas }))
     );
   }, [salas, peliculaCodigo]);
@@ -48,6 +57,10 @@ export default function ReservaScreen() {
     : 0;
 
   const continuar = () => {
+    if (pelicula.estado !== 'Disponible') {
+      Alert.alert('No disponible', 'Esta película ya no está disponible para compra.');
+      return;
+    }
     if (!funcionActual) {
       Alert.alert('Selecciona una función', 'Debes elegir horario y sala para continuar.');
       return;
@@ -133,40 +146,40 @@ export default function ReservaScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  contenedor: { flex: 1, backgroundColor: '#fff', padding: 16 },
+const makeStyles = (colors: Palette) => StyleSheet.create({
+  contenedor: { flex: 1, backgroundColor: colors.surface, padding: 16 },
   titulo: { fontSize: 20, fontWeight: '700' },
-  subtitulo: { fontSize: 13, color: '#666', marginBottom: 12 },
+  subtitulo: { fontSize: 13, color: colors.muted, marginBottom: 12 },
   seccion: { fontSize: 14, fontWeight: '700', marginTop: 16, marginBottom: 8 },
-  vacio: { color: '#888', textAlign: 'center', marginTop: 12 },
+  vacio: { color: colors.muted, textAlign: 'center', marginTop: 12 },
   funcion: {
     padding: 12,
     borderRadius: 10,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: colors.background,
     marginBottom: 8,
   },
-  funcionActiva: { backgroundColor: '#1E3A8A' },
-  funcionTexto: { fontSize: 14, color: '#333' },
-  funcionTextoActiva: { color: '#fff', fontWeight: '600' },
-  disponibilidad: { fontSize: 13, color: '#555', marginTop: 4 },
+  funcionActiva: { backgroundColor: colors.primary },
+  funcionTexto: { fontSize: 14, color: colors.text },
+  funcionTextoActiva: { color: colors.primaryText, fontWeight: '600' },
+  disponibilidad: { fontSize: 13, color: colors.muted, marginTop: 4 },
   stepper: { flexDirection: 'row', alignItems: 'center' },
   stepperBoton: {
     width: 40,
     height: 40,
     borderRadius: 8,
-    backgroundColor: '#EEF2FF',
+    backgroundColor: colors.raised,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  stepperTexto: { fontSize: 20, color: '#1E3A8A', fontWeight: '700' },
+  stepperTexto: { fontSize: 20, color: colors.primary, fontWeight: '700' },
   stepperValor: { fontSize: 18, fontWeight: '700', marginHorizontal: 20 },
   total: { fontSize: 16, fontWeight: '700', marginTop: 16 },
   botonContinuar: {
-    backgroundColor: '#1E3A8A',
+    backgroundColor: colors.primary,
     paddingVertical: 14,
     borderRadius: 10,
     alignItems: 'center',
     marginTop: 20,
   },
-  botonContinuarTexto: { color: '#fff', fontWeight: '700', fontSize: 15 },
+  botonContinuarTexto: { color: colors.primaryText, fontWeight: '700', fontSize: 15 },
 });

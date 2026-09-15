@@ -1,3 +1,4 @@
+import type { DatosSala } from '../../domain/salas';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Sala, Funcion } from '../../types/sala';
 import { salasIniciales } from '../seedData';
@@ -14,6 +15,16 @@ const salasSlice = createSlice({
   name: 'salas',
   initialState,
   reducers: {
+    agregarSala: (state, action: PayloadAction<DatosSala>) => {
+      state.lista.push({ ...action.payload, funciones: [] });
+    },
+    editarSala: (state, action: PayloadAction<DatosSala>) => {
+      const sala = state.lista.find(s => s.id === action.payload.id);
+      if (sala) { sala.nombre = action.payload.nombre; sala.filas = action.payload.filas; sala.columnas = action.payload.columnas; }
+    },
+    eliminarSala: (state, action: PayloadAction<string>) => {
+      state.lista = state.lista.filter(s => s.id !== action.payload);
+    },
     agregarFuncion: (state, action: PayloadAction<Funcion>) => {
       const sala = state.lista.find((s) => s.id === action.payload.salaId);
       if (sala) {
@@ -23,7 +34,7 @@ const salasSlice = createSlice({
   },
 });
 
-export const { agregarFuncion } = salasSlice.actions;
+export const { agregarFuncion, agregarSala, editarSala, eliminarSala } = salasSlice.actions;
 export default salasSlice.reducer;
 
 // Helper puro (no es un thunk, se usa desde componentes con useAppSelector + find)

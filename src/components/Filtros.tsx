@@ -1,5 +1,8 @@
+import { useTheme, Palette } from '../ui/theme';
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import { Text } from '../ui/Typography';
+
 
 interface GrupoFiltro {
   etiqueta: string;
@@ -13,12 +16,15 @@ interface Props {
 }
 
 export default function Filtros({ grupos }: Props) {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   return (
     <View style={styles.contenedor}>
       {grupos.map((grupo) => (
         <View key={grupo.etiqueta} style={styles.grupo}>
           <Text style={styles.etiquetaGrupo}>{grupo.etiqueta}</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.opciones}>
             <TouchableOpacity
               style={[styles.chip, grupo.valorSeleccionado === null && styles.chipActivo]}
               onPress={() => grupo.onSeleccionar(null)}
@@ -57,36 +63,43 @@ export default function Filtros({ grupos }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) => StyleSheet.create({
   contenedor: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 0,
     paddingTop: 8,
   },
   grupo: {
-    marginBottom: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+    gap: 8,
   },
+  opciones: { flex: 1, minWidth: 0 },
   etiquetaGrupo: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#666',
-    marginBottom: 4,
+    color: colors.muted,
+    width: 80,
+    flexShrink: 0,
   },
   chip: {
     paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingVertical: 8,
+    minHeight: 40,
+    justifyContent: 'center',
     borderRadius: 16,
-    backgroundColor: '#eee',
+    backgroundColor: colors.raised,
     marginRight: 8,
   },
   chipActivo: {
-    backgroundColor: '#1E3A8A',
+    backgroundColor: colors.primary,
   },
   chipTexto: {
     fontSize: 13,
-    color: '#333',
+    color: colors.text,
   },
   chipTextoActivo: {
-    color: '#fff',
+    color: colors.primaryText,
     fontWeight: '600',
   },
 });

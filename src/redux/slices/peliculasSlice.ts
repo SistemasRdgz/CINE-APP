@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { errorPelicula } from '../../domain/cine';
 import { Pelicula } from '../../types/pelicula';
 import { peliculasIniciales } from '../seedData';
 
@@ -15,11 +16,11 @@ const peliculasSlice = createSlice({
   initialState,
   reducers: {
     agregarPelicula: (state, action: PayloadAction<Pelicula>) => {
-      state.lista.push(action.payload);
+      if (!errorPelicula(action.payload, state.lista)) state.lista.push(action.payload);
     },
     editarPelicula: (state, action: PayloadAction<Pelicula>) => {
       const idx = state.lista.findIndex((p) => p.codigo === action.payload.codigo);
-      if (idx !== -1) {
+      if (idx !== -1 && !errorPelicula(action.payload, state.lista, true)) {
         state.lista[idx] = action.payload;
       }
     },

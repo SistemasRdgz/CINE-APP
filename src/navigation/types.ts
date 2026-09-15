@@ -6,6 +6,8 @@ export type RootStackParamList = {
   PersonalHome: undefined;
   PersonalPeliculas: undefined;
   FormularioPelicula: { codigo?: string } | undefined;
+  Salas: undefined;
+  Funciones: undefined;
   Dashboard: undefined;
   Escaner: undefined;
 };

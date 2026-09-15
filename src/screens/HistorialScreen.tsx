@@ -1,8 +1,15 @@
+import { useTheme, Palette } from '../ui/theme';
 import React from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import BoletoQR from '../components/BoletoQR';
+import { View, FlatList, StyleSheet } from 'react-native';
+import { Text } from '../ui/Typography';
+
 import { useAppSelector } from '../redux/hooks';
 
 export default function HistorialScreen() {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   const reservas = useAppSelector((state) => state.reservas.lista);
   const ordenadas = [...reservas].sort(
     (a, b) => new Date(b.fechaCompra).getTime() - new Date(a.fechaCompra).getTime()
@@ -27,6 +34,9 @@ export default function HistorialScreen() {
               {item.salaNombre} · {item.fecha} · {item.hora}
             </Text>
             <Text style={styles.detalle}>Asientos: {item.asientos.join(', ')}</Text>
+            <BoletoQR id={item.id} />
+            <Text style={styles.detalle}>Un QR por reserva: incluye todos los asientos indicados.</Text>
+            {!!item.fechaUso && <Text style={styles.detalle}>Utilizado: {new Date(item.fechaUso).toLocaleString()}</Text>}
             <Text style={styles.detalle}>Cliente: {item.cliente.nombre}</Text>
             <View style={styles.filaTotal}>
               <Text style={styles.total}>Total: ${item.total.toFixed(2)}</Text>
@@ -41,13 +51,15 @@ export default function HistorialScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  contenedor: { flex: 1, backgroundColor: '#F3F4F6' },
-  vacio: { textAlign: 'center', color: '#888', marginTop: 40 },
+const makeStyles = (colors: Palette) => StyleSheet.create({
+  contenedor: { flex: 1, backgroundColor: colors.background },
+  vacio: { textAlign: 'center', color: colors.muted, marginTop: 40 },
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 14,
+    backgroundColor: colors.surface,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: 18,
     marginBottom: 12,
     shadowColor: '#000',
     shadowOpacity: 0.06,
@@ -55,10 +67,10 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 2,
   },
-  filaTitulo: { flexDirection: 'row', justifyContent: 'space-between' },
+  filaTitulo: { gap: 8, marginBottom: 12 },
   pelicula: { fontSize: 16, fontWeight: '700', flexShrink: 1 },
-  codigo: { fontSize: 12, color: '#999' },
-  detalle: { fontSize: 13, color: '#555', marginTop: 2 },
+  codigo: { fontSize: 12, color: colors.muted },
+  detalle: { fontSize: 13, color: colors.muted, marginTop: 2 },
   filaTotal: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -66,6 +78,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   total: { fontSize: 15, fontWeight: '700' },
-  pendiente: { color: '#16A34A', fontWeight: '600', fontSize: 12 },
-  usado: { color: '#B91C1C', fontWeight: '600', fontSize: 12 },
+  pendiente: { color: colors.success, fontWeight: '600', fontSize: 12 },
+  usado: { color: colors.danger, fontWeight: '600', fontSize: 12 },
 });

@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "android": {
       "package": "com.udb.cineapp",
       "permissions": [
@@ -18,13 +18,21 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Permitir a CineApp acceder a tu cámara para escanear boletos."
+          "cameraPermission": "Permitir a CineApp acceder a tu cámara para escanear boletos.",
+          "recordAudioAndroid": false
         }
       ],
       [
         "expo-local-authentication",
         {
           "faceIDPermission": "Permitir a CineApp usar Face ID para acceder a la Zona de Personal."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Selecciona una imagen para la portada de la película.",
+          "microphonePermission": false
         }
       ]
     ]

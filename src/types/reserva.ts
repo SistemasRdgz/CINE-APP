@@ -18,5 +18,6 @@ export interface Reserva {
   total: number;
   cliente: ClienteInfo;
   fechaCompra: string; // ISO string
+  fechaUso?: string;
   usado: boolean; // para validación de boleto (Módulo 7)
 }

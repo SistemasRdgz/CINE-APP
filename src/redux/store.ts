@@ -1,7 +1,9 @@
-import { combineReducers, configureStore } from '@reduxjs/toolkit';
+import { migraciones } from './migraciones';
+import { configureStore } from '@reduxjs/toolkit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   persistStore,
+  createMigrate,
   persistReducer,
   FLUSH,
   REHYDRATE,
@@ -11,21 +13,18 @@ import {
   REGISTER,
 } from 'redux-persist';
 
-import peliculasReducer from './slices/peliculasSlice';
-import reservasReducer from './slices/reservasSlice';
-import salasReducer from './slices/salasSlice';
+import rootReducer from './rootReducer';
+import { almacenamientoRecuperable } from './almacenamiento';
 
-const rootReducer = combineReducers({
-  peliculas: peliculasReducer,
-  reservas: reservasReducer,
-  salas: salasReducer,
-});
+const almacenamiento = almacenamientoRecuperable(AsyncStorage);
 
 const persistConfig = {
   key: 'cine-app-root',
-  storage: AsyncStorage,
+  version: 1,
+  migrate: createMigrate(migraciones),
+  storage: almacenamiento,
   // Persistimos TODO el estado global de la app (obligatorio según indicaciones).
-  whitelist: ['peliculas', 'reservas', 'salas'],
+  whitelist: ['peliculas', 'reservas', 'salas', 'preferencias'],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -44,3 +43,8 @@ export const persistor = persistStore(store);
 
 export type RootState = ReturnType<typeof rootReducer>;
 export type AppDispatch = typeof store.dispatch;
+
+export async function guardarEstado() {
+  await persistor.flush();
+  await almacenamiento.verificar();
+}

@@ -1,8 +1,14 @@
+import Icon from '../ui/Icon';
+import { useTheme, Palette } from '../ui/theme';
 import React, { useMemo, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, FlatList, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
+import { Text } from '../ui/Typography';
+import { useDialog } from '../ui/Dialog';
+
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
+import { normalizar } from '../domain/cine';
 import Buscador from '../components/Buscador';
 import Filtros from '../components/Filtros';
 import PeliculaFila from '../components/PeliculaFila';
@@ -17,12 +23,18 @@ interface Props {
 }
 
 export default function PeliculasScreen({ modo: modoProp }: Props) {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
+  const Alert = useDialog();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<RouteProp<Record<string, { modo?: Modo }>, string>>();
+  const { width } = useWindowDimensions();
   const modo: Modo = modoProp ?? route.params?.modo ?? 'cliente';
 
   const dispatch = useAppDispatch();
   const peliculas = useAppSelector((state) => state.peliculas.lista);
+  const salasDisponibles = useAppSelector(state => state.salas.lista);
 
   const [texto, setTexto] = useState('');
   const [genero, setGenero] = useState<string | null>(null);
@@ -44,7 +56,7 @@ export default function PeliculasScreen({ modo: modoProp }: Props) {
   );
 
   const peliculasFiltradas = useMemo(() => {
-    const t = texto.trim().toLowerCase();
+    const t = normalizar(texto);
     return peliculas.filter((p) => {
       if (modo === 'cliente' && p.estado !== 'Disponible') return false;
       if (estadoFiltro && p.estado !== estadoFiltro) return false;
@@ -53,15 +65,13 @@ export default function PeliculasScreen({ modo: modoProp }: Props) {
       if (sala && p.salaAsignada !== sala) return false;
       if (
         t.length > 0 &&
-        !`${p.nombre} ${p.genero} ${p.clasificacion} ${p.salaAsignada}`
-          .toLowerCase()
-          .includes(t)
+        !normalizar(`${p.nombre} ${p.genero} ${p.clasificacion} ${p.salaAsignada} ${salasDisponibles.find(s => s.id === p.salaAsignada)?.nombre ?? ''}`).includes(t)
       ) {
         return false;
       }
       return true;
     });
-  }, [peliculas, texto, genero, clasificacion, sala, estadoFiltro, modo]);
+  }, [peliculas, texto, genero, clasificacion, sala, estadoFiltro, modo, salasDisponibles]);
 
   const confirmarEliminar = (codigo: string, nombre: string) => {
     Alert.alert('Eliminar película', `¿Seguro que deseas eliminar "${nombre}"?`, [
@@ -80,61 +90,45 @@ export default function PeliculasScreen({ modo: modoProp }: Props) {
     },
     { etiqueta: 'Sala', opciones: salas, valorSeleccionado: sala, onSeleccionar: setSala },
   ];
-  if (modo === 'personal') {
+  {
     gruposFiltro.push({
       etiqueta: 'Estado',
-      opciones: ['Disponible', 'No disponible'],
+      opciones: modo === 'personal' ? ['Disponible', 'No disponible'] : ['Disponible'],
       valorSeleccionado: estadoFiltro,
       onSeleccionar: setEstadoFiltro,
     });
   }
 
-  return (
-    <View style={styles.contenedor}>
-      <Buscador valor={texto} onCambiar={setTexto} />
-      <Filtros grupos={gruposFiltro} />
-
-      {modo === 'personal' && (
-        <TouchableOpacity
-          style={styles.botonAgregar}
-          onPress={() => navigation.navigate('FormularioPelicula', undefined)}
-        >
-          <Text style={styles.botonAgregarTexto}>+ Agregar película</Text>
-        </TouchableOpacity>
-      )}
-
-      <FlatList
-        data={peliculasFiltradas}
-        keyExtractor={(item) => item.codigo}
-        contentContainerStyle={{ paddingBottom: 24, paddingTop: 8 }}
-        ListEmptyComponent={
-          <Text style={styles.vacio}>No se encontraron películas con esos criterios.</Text>
-        }
-        renderItem={({ item }) => (
-          <PeliculaFila
-            pelicula={item}
-            modo={modo}
-            onReservar={() => navigation.navigate('Reserva', { peliculaCodigo: item.codigo })}
-            onEditar={() => navigation.navigate('FormularioPelicula', { codigo: item.codigo })}
-            onEliminar={() => confirmarEliminar(item.codigo, item.nombre)}
-            onToggleEstado={() => dispatch(toggleEstadoPelicula(item.codigo))}
-          />
-        )}
-      />
-    </View>
-  );
+  const columnas = modo === 'cliente' && width >= 350 ? 2 : 1;
+  return <View style={styles.contenedor}>
+    <FlatList key={columnas} numColumns={columnas} data={peliculasFiltradas}
+      keyExtractor={item => item.codigo} contentContainerStyle={styles.lista}
+      columnWrapperStyle={columnas > 1 ? { gap: 12 } : undefined}
+      ListHeaderComponent={<>
+        {modo === 'cliente' && <View style={styles.hero}>
+          <View style={styles.brandRow}><Text style={styles.brand}>CineApp</Text><Text style={styles.eyebrow}>EN CARTELERA</Text></View>
+          <Text style={styles.slogan}>Tu próxima gran historia</Text>
+          <Text style={styles.subtitle}>Elige una película. Vive el cine.</Text>
+        </View>}
+        <Buscador valor={texto} onCambiar={setTexto} />
+        <Filtros grupos={gruposFiltro} />
+        {modo === 'personal' && <TouchableOpacity style={styles.botonAgregar} onPress={() => navigation.navigate('FormularioPelicula', undefined)}><Icon name="plus" color={colors.primaryText} size={20} /><Text style={styles.botonAgregarTexto}>Agregar película</Text></TouchableOpacity>}
+        <Text style={styles.resultados}>{peliculasFiltradas.length} película{peliculasFiltradas.length === 1 ? '' : 's'}</Text>
+      </>}
+      ListEmptyComponent={<Text style={styles.vacio}>No se encontraron películas con esos criterios.</Text>}
+      renderItem={({ item, index }) => <View style={{ flex: 1, maxWidth: columnas === 2 ? '48.5%' : '100%', marginBottom: 16 }}>
+        <PeliculaFila pelicula={item} modo={modo}
+          onReservar={() => navigation.navigate('Reserva', { peliculaCodigo: item.codigo })}
+          onEditar={() => navigation.navigate('FormularioPelicula', { codigo: item.codigo })}
+          onEliminar={() => confirmarEliminar(item.codigo, item.nombre)}
+          onToggleEstado={() => dispatch(toggleEstadoPelicula(item.codigo))} />
+      </View>} />
+  </View>;
 }
-
-const styles = StyleSheet.create({
-  contenedor: { flex: 1, backgroundColor: '#F3F4F6' },
-  vacio: { textAlign: 'center', color: '#888', marginTop: 40 },
-  botonAgregar: {
-    marginHorizontal: 16,
-    marginTop: 12,
-    backgroundColor: '#1E3A8A',
-    paddingVertical: 10,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  botonAgregarTexto: { color: '#fff', fontWeight: '700' },
+const makeStyles = (colors: Palette) => StyleSheet.create({
+  contenedor: { flex: 1, backgroundColor: colors.background }, lista: { paddingHorizontal: 16, paddingBottom: 24 },
+  hero: { paddingTop: 10, paddingBottom: 12 }, brandRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }, brand: { color: colors.primary, fontSize: 22, fontWeight: '800' },
+  eyebrow: { color: colors.muted, fontSize: 10, letterSpacing: 2 }, slogan: { color: colors.text, fontSize: 24, lineHeight: 29, fontWeight: '800', marginTop: 10 }, subtitle: { color: colors.muted, marginTop: 5, fontSize: 12 },
+  resultados: { color: colors.muted, marginVertical: 10, fontSize: 12 }, vacio: { color: colors.muted, textAlign: 'center', paddingVertical: 24 },
+  botonAgregar: { backgroundColor: colors.primary, borderRadius: 12, padding: 14, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 16 }, botonAgregarTexto: { color: colors.primaryText, fontWeight: '700' },
 });
