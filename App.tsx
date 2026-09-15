@@ -7,12 +7,14 @@ import { ActivityIndicator, View } from 'react-native';
 
 import { SesionPersonalProvider } from './src/auth/SesionPersonal';
 import { store, persistor } from './src/redux/store';
+import { DialogProvider } from './src/ui/Dialog';
+import { navigationTheme, colors } from './src/ui/theme';
 import AppNavigator from './src/navigation/AppNavigator';
 
 function CargandoPantalla() {
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <ActivityIndicator size="large" color="#1E3A8A" />
+    <View style={{ backgroundColor: colors.background, flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <ActivityIndicator size="large" color={colors.primary} />
     </View>
   );
 }
@@ -22,10 +24,12 @@ export default function App() {
     <Provider store={store}>
       <PersistGate loading={<CargandoPantalla />} persistor={persistor}>
         <SesionPersonalProvider>
-        <NavigationContainer>
-          <StatusBar style="auto" />
+        <DialogProvider>
+        <NavigationContainer theme={navigationTheme}>
+          <StatusBar style="light" />
           <AppNavigator />
         </NavigationContainer>
+        </DialogProvider>
         </SesionPersonalProvider>
       </PersistGate>
     </Provider>

@@ -1,5 +1,9 @@
+import Icon from '../ui/Icon';
+import { colors } from '../ui/theme';
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { Text } from '../ui/Typography';
+
 import * as LocalAuthentication from 'expo-local-authentication';
 import { useSesionPersonal } from '../auth/SesionPersonal';
 
@@ -51,7 +55,7 @@ export default function AccesoPersonalScreen() {
 
   return (
     <View style={styles.contenedor}>
-      <Text style={styles.icono}>🔒</Text>
+      <View style={{ backgroundColor: colors.raised, padding: 24, borderRadius: 28, marginBottom: 24 }}><Icon name="fingerprint" size={58} /></View>
       <Text style={styles.titulo}>Zona de Personal</Text>
       <Text style={styles.subtitulo}>
         Esta sección es de uso exclusivo del staff del cine. Se requiere autenticación
@@ -59,7 +63,7 @@ export default function AccesoPersonalScreen() {
       </Text>
 
       {verificando ? (
-        <ActivityIndicator size="large" color="#1E3A8A" style={{ marginTop: 24 }} />
+        <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: 24 }} />
       ) : (
         <TouchableOpacity style={styles.boton} onPress={autenticar}>
           <Text style={styles.botonTexto}>Autenticarse</Text>
@@ -74,20 +78,20 @@ export default function AccesoPersonalScreen() {
 const styles = StyleSheet.create({
   contenedor: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
     padding: 24,
   },
   icono: { fontSize: 48, marginBottom: 12 },
   titulo: { fontSize: 20, fontWeight: '700', marginBottom: 8 },
-  subtitulo: { fontSize: 14, color: '#666', textAlign: 'center', marginBottom: 24 },
+  subtitulo: { fontSize: 14, color: colors.muted, textAlign: 'center', marginBottom: 24 },
   boton: {
-    backgroundColor: '#1E3A8A',
+    backgroundColor: colors.primary,
     paddingVertical: 14,
     paddingHorizontal: 32,
     borderRadius: 10,
   },
-  botonTexto: { color: '#fff', fontWeight: '700', fontSize: 15 },
-  mensajeError: { color: '#B91C1C', marginTop: 16, textAlign: 'center', fontSize: 13 },
+  botonTexto: { color: colors.primaryText, fontWeight: '700', fontSize: 15 },
+  mensajeError: { color: colors.danger, marginTop: 16, textAlign: 'center', fontSize: 13 },
 });

@@ -1,11 +1,19 @@
+import DateTimePicker from '@react-native-community/datetimepicker';
+import Select from '../ui/Select';
+import Icon from '../ui/Icon';
+import { colors } from '../ui/theme';
 import React, { useState } from 'react';
-import { ScrollView, View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { ScrollView, View, TouchableOpacity, StyleSheet } from 'react-native';
+import { Text } from '../ui/Typography';
+import { useDialog } from '../ui/Dialog';
+
 import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import { programarFuncion } from '../redux/operaciones';
 import { fechaLocal } from '../domain/cine';
 import { nanoid } from '@reduxjs/toolkit';
 
 export default function FuncionesScreen() {
+  const Alert = useDialog();
   const peliculas = useAppSelector(s => s.peliculas.lista);
   const salas = useAppSelector(s => s.salas.lista);
   const dispatch = useAppDispatch();
@@ -13,6 +21,7 @@ export default function FuncionesScreen() {
   const [fecha, setFecha] = useState(fechaLocal());
   const [hora, setHora] = useState('19:00');
   const [error, setError] = useState('');
+  const [selector, setSelector] = useState<'date' | 'time' | null>(null);
   const pelicula = peliculas.find(p => p.codigo === codigo);
   const sala = salas.find(s => s.id === pelicula?.salaAsignada);
   const funciones = salas.flatMap(s => s.funciones.map(f => ({ ...f, sala: s.nombre }))).sort((a, b) => `${a.fecha} ${a.hora}`.localeCompare(`${b.fecha} ${b.hora}`));
@@ -23,16 +32,19 @@ export default function FuncionesScreen() {
   }
   return <ScrollView style={styles.root} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
     <Text style={styles.title}>Programar función</Text>
-    <Text style={styles.label}>Película</Text>
-    <View style={styles.choices}>{peliculas.map(p => <TouchableOpacity key={p.codigo} style={[styles.choice, codigo === p.codigo && styles.active]} onPress={() => setCodigo(p.codigo)}>
-      <Text style={codigo === p.codigo ? styles.white : styles.text}>{p.nombre}</Text>
-    </TouchableOpacity>)}</View>
+    <Select label="Película" value={codigo} options={peliculas.map(p => ({ label: p.nombre, value: p.codigo }))} onChange={setCodigo} />
     {!peliculas.length && <Text style={styles.error}>Agrega una película antes de programar funciones.</Text>}
     <Text style={styles.label}>Sala: {sala?.nombre ?? 'Sin asignar'}</Text>
-    <Text style={styles.label}>Fecha (AAAA-MM-DD)</Text>
-    <TextInput accessibilityLabel="Fecha de la función" style={styles.input} value={fecha} onChangeText={setFecha} placeholder="2026-09-20" maxLength={10} />
-    <Text style={styles.label}>Hora de 24 horas (HH:MM)</Text>
-    <TextInput accessibilityLabel="Hora de la función" style={styles.input} value={hora} onChangeText={setHora} placeholder="19:30" maxLength={5} />
+    <Text style={styles.label}>Fecha de la función</Text>
+    <TouchableOpacity accessibilityRole="button" accessibilityLabel="Elegir fecha de la función" style={styles.picker} onPress={() => setSelector('date')}><Icon name="calendar-month-outline" /><Text style={styles.pickerText}>{new Date(`${fecha}T12:00:00`).toLocaleDateString('es-SV', { day: 'numeric', month: 'long', year: 'numeric' })}</Text><Icon name="chevron-down" size={20} /></TouchableOpacity>
+    <Text style={styles.label}>Hora de inicio</Text>
+    <TouchableOpacity accessibilityRole="button" accessibilityLabel="Elegir hora de la función" style={styles.picker} onPress={() => setSelector('time')}><Icon name="clock-outline" /><Text style={styles.pickerText}>{hora}</Text><Icon name="chevron-down" size={20} /></TouchableOpacity>
+    {selector && <DateTimePicker value={new Date(`${fecha}T${hora}:00`)} mode={selector} display="default" is24Hour minimumDate={selector === 'date' ? new Date(new Date().setHours(0,0,0,0)) : undefined} onChange={(evento, valor) => {
+      const modo = selector; setSelector(null);
+      if (evento.type !== 'set' || !valor) return;
+      if (modo === 'date') setFecha(fechaLocal(valor));
+      else setHora(`${String(valor.getHours()).padStart(2, '0')}:${String(valor.getMinutes()).padStart(2, '0')}`);
+    }} />}
     {!!error && <Text style={styles.error}>{error}</Text>}
     <TouchableOpacity style={styles.button} onPress={guardar}><Text style={styles.white}>Guardar función</Text></TouchableOpacity>
     <Text style={styles.title}>Funciones registradas ({funciones.length})</Text>
@@ -44,11 +56,13 @@ export default function FuncionesScreen() {
   </ScrollView>;
 }
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#F3F4F6' }, content: { padding: 16, paddingBottom: 40 },
-  title: { fontSize: 20, fontWeight: '700', color: '#1E3A8A', marginVertical: 16 },
-  label: { fontWeight: '600', marginVertical: 8, color: '#444' }, text: { color: '#444', lineHeight: 21 }, bold: { fontWeight: '700', marginBottom: 6 },
-  choices: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 }, choice: { padding: 12, borderRadius: 8, backgroundColor: '#E5E7EB' }, active: { backgroundColor: '#1E3A8A' },
-  white: { color: 'white', fontWeight: '600' }, input: { borderWidth: 1, borderColor: '#CCC', backgroundColor: 'white', padding: 12, borderRadius: 8 },
-  button: { backgroundColor: '#1E3A8A', padding: 15, borderRadius: 10, alignItems: 'center', marginTop: 16 },
-  error: { color: '#B91C1C', marginVertical: 12 }, card: { backgroundColor: 'white', padding: 14, borderRadius: 10, marginBottom: 10 },
+  picker: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, borderRadius: 12, padding: 16, marginBottom: 14 },
+  pickerText: { flex: 1, color: colors.text, fontSize: 16 },
+  root: { flex: 1, backgroundColor: colors.background }, content: { padding: 16, paddingBottom: 40 },
+  title: { fontSize: 20, fontWeight: '700', color: colors.primary, marginVertical: 16 },
+  label: { fontWeight: '600', marginVertical: 8, color: colors.muted }, text: { color: colors.muted, lineHeight: 21 }, bold: { fontWeight: '700', marginBottom: 6 },
+  choices: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 }, choice: { padding: 12, borderRadius: 8, backgroundColor: colors.raised }, active: { backgroundColor: colors.primary },
+  white: { color: colors.primaryText, fontWeight: '600' }, input: { borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, padding: 12, borderRadius: 8 },
+  button: { backgroundColor: colors.primary, padding: 15, borderRadius: 10, alignItems: 'center', marginTop: 16 },
+  error: { color: colors.danger, marginVertical: 12 }, card: { backgroundColor: colors.surface, padding: 14, borderRadius: 10, marginBottom: 10 },
 });

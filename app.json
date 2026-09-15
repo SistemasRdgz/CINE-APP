@@ -27,6 +27,13 @@
         {
           "faceIDPermission": "Permitir a CineApp usar Face ID para acceder a la Zona de Personal."
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Selecciona una imagen para la portada de la película.",
+          "microphonePermission": false
+        }
       ]
     ]
   }

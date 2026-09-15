@@ -1,5 +1,8 @@
+import { colors } from '../ui/theme';
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import { Text } from '../ui/Typography';
+
 
 interface GrupoFiltro {
   etiqueta: string;
@@ -59,7 +62,7 @@ export default function Filtros({ grupos }: Props) {
 
 const styles = StyleSheet.create({
   contenedor: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 0,
     paddingTop: 8,
   },
   grupo: {
@@ -68,25 +71,25 @@ const styles = StyleSheet.create({
   etiquetaGrupo: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#666',
+    color: colors.muted,
     marginBottom: 4,
   },
   chip: {
     paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingVertical: 10,
     borderRadius: 16,
-    backgroundColor: '#eee',
+    backgroundColor: colors.raised,
     marginRight: 8,
   },
   chipActivo: {
-    backgroundColor: '#1E3A8A',
+    backgroundColor: colors.primary,
   },
   chipTexto: {
     fontSize: 13,
-    color: '#333',
+    color: colors.text,
   },
   chipTextoActivo: {
-    color: '#fff',
+    color: colors.primaryText,
     fontWeight: '600',
   },
 });

@@ -1,3 +1,5 @@
+import Icon from '../ui/Icon';
+import { colors } from '../ui/theme';
 import React from 'react';
 import { useSesionPersonal } from '../auth/SesionPersonal';
 import FuncionesScreen from '../screens/FuncionesScreen';
@@ -28,7 +30,7 @@ function BotonAccesoPersonal() {
       style={styles.botonDiscreto}
       onPress={() => navigation.navigate('AccesoPersonal')}
     >
-      <Text style={styles.botonDiscretoTexto}>Personal</Text>
+      <Icon name="account-lock-outline" size={20} /><Text style={styles.botonDiscretoTexto}>Personal</Text>
     </TouchableOpacity>
   );
 }
@@ -39,7 +41,13 @@ function CatalogoScreen() {
 
 function ClienteTabs() {
   return (
-    <Tab.Navigator screenOptions={{ headerShown: true }}>
+    <Tab.Navigator screenOptions={({ route }) => ({
+      headerShown: true, headerStyle: { backgroundColor: colors.background }, headerTintColor: colors.text,
+      tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
+      tabBarActiveTintColor: colors.primary, tabBarInactiveTintColor: colors.muted,
+      tabBarIcon: ({ color, size }) => <Icon name={route.name === 'Catalogo' ? 'movie-open-outline' : 'ticket-confirmation-outline'} color={color} size={size} />,
+      tabBarLabelStyle: { fontSize: 12, fontWeight: '600' },
+    })}>
       <Tab.Screen
         name="Catalogo"
         component={CatalogoScreen}
@@ -64,7 +72,7 @@ function PersonalPeliculasScreen() {
 export default function AppNavigator() {
   const { autorizado } = useSesionPersonal();
   return (
-    <Stack.Navigator initialRouteName="ClienteTabs">
+    <Stack.Navigator initialRouteName="ClienteTabs" screenOptions={{ headerStyle: { backgroundColor: colors.background }, headerTintColor: colors.text, contentStyle: { backgroundColor: colors.background } }}>
       {!autorizado ? <Stack.Group navigationKey="cliente">
       <Stack.Screen
         name="ClienteTabs"
@@ -111,6 +119,6 @@ export default function AppNavigator() {
 }
 
 const styles = StyleSheet.create({
-  botonDiscreto: { marginRight: 12, paddingHorizontal: 8, paddingVertical: 4 },
-  botonDiscretoTexto: { color: '#1E3A8A', fontSize: 13, fontWeight: '600' },
+  botonDiscreto: { flexDirection: 'row', alignItems: 'center', gap: 6, marginRight: 12, paddingHorizontal: 8, paddingVertical: 4 },
+  botonDiscretoTexto: { color: colors.primary, fontSize: 13, fontWeight: '600' },
 });

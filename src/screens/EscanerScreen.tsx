@@ -1,5 +1,8 @@
+import { colors } from '../ui/theme';
 import React, { useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Linking, ActivityIndicator } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Linking, ActivityIndicator } from 'react-native';
+import { Text } from '../ui/Typography';
+
 import { CameraView, useCameraPermissions, BarcodeScanningResult } from 'expo-camera';
 import { useIsFocused } from '@react-navigation/native';
 import { useAppDispatch } from '../redux/hooks';
@@ -45,7 +48,7 @@ export default function EscanerScreen() {
   return <View style={styles.root}>
     <Text style={styles.title}>Validar entrada</Text>
     <Text style={styles.text}>Apunta al QR. Una lectura válida registra como utilizada toda la reserva.</Text>
-    {resultado ? <View style={[styles.result, { backgroundColor: resultado.ok ? '#DCFCE7' : '#FEE2E2' }]}>
+    {resultado ? <View style={[styles.result, { backgroundColor: resultado.ok ? colors.raised : colors.wineSoft }]}>
       <Text style={styles.title}>{resultado.ok ? 'Ingreso registrado' : 'Boleto rechazado'}</Text>
       <Text style={styles.text}>{resultado.mensaje}</Text>
       {guardando && <ActivityIndicator />}
@@ -62,10 +65,10 @@ export default function EscanerScreen() {
   </View>;
 }
 const styles = StyleSheet.create({
-  root: { flex: 1, padding: 16, backgroundColor: '#F3F4F6' }, center: { flex: 1, padding: 24, justifyContent: 'center' },
-  title: { fontSize: 21, fontWeight: '700', color: '#1E3A8A', marginBottom: 12 },
-  text: { fontSize: 15, lineHeight: 23, color: '#333', marginBottom: 16 },
+  root: { flex: 1, padding: 16, backgroundColor: colors.background }, center: { flex: 1, padding: 24, justifyContent: 'center' },
+  title: { fontSize: 21, fontWeight: '700', color: colors.primary, marginBottom: 12 },
+  text: { fontSize: 15, lineHeight: 23, color: colors.text, marginBottom: 16 },
   camera: { flex: 1, minHeight: 200, marginBottom: 16 }, result: { padding: 20, borderRadius: 12 },
-  button: { backgroundColor: '#1E3A8A', padding: 15, borderRadius: 10, alignItems: 'center', marginTop: 12 },
-  buttonText: { color: 'white', fontWeight: '700' }, error: { color: '#B91C1C', marginTop: 12 },
+  button: { backgroundColor: colors.primary, padding: 15, borderRadius: 10, alignItems: 'center', marginTop: 12 },
+  buttonText: { color: colors.primaryText, fontWeight: '700' }, error: { color: colors.danger, marginTop: 12 },
 });

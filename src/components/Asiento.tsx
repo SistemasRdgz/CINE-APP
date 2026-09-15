@@ -1,54 +1,14 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { EstadoAsiento } from '../types/asiento';
-
-interface Props {
-  id: string;
-  estado: EstadoAsiento;
-  onPress: () => void;
+import Icon from '../ui/Icon';
+import { colors as c } from '../ui/theme';
+export default function Asiento({ id, estado, onPress }: { id: string; estado: EstadoAsiento; onPress: () => void }) {
+  const ocupado = estado === 'Ocupado', seleccionado = estado === 'Seleccionado';
+  return <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Asiento ${id}: ${estado}`} accessibilityState={{ disabled: ocupado, selected: seleccionado }} disabled={ocupado} onPress={onPress} style={[s.seat, ocupado && s.occupied, seleccionado && s.selected]}>
+    <Icon name={ocupado ? 'close' : 'seat-outline'} size={25} color={seleccionado ? c.primaryText : ocupado ? c.danger : c.muted} />
+    <Text style={[s.label, seleccionado && { color: c.primaryText }]}>{id}</Text>
+  </TouchableOpacity>;
 }
-
-export default function Asiento({ id, estado, onPress }: Props) {
-  const disabled = estado === 'Ocupado';
-
-  return (
-    <TouchableOpacity
-      style={[
-        styles.asiento,
-        estado === 'Disponible' && styles.disponible,
-        estado === 'Seleccionado' && styles.seleccionado,
-        estado === 'Ocupado' && styles.ocupado,
-      ]}
-      accessibilityRole="button"
-      accessibilityLabel={`Asiento ${id}: ${estado}`}
-      accessibilityState={{ disabled, selected: estado === 'Seleccionado' }}
-      disabled={disabled}
-      onPress={onPress}
-    >
-      <Text
-        style={[
-          styles.texto,
-          (estado === 'Seleccionado' || estado === 'Ocupado') && styles.textoClaro,
-        ]}
-      >
-        {id}
-      </Text>
-    </TouchableOpacity>
-  );
-}
-
-const styles = StyleSheet.create({
-  asiento: {
-    width: 44,
-    height: 44,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    margin: 4,
-  },
-  disponible: { backgroundColor: '#E5E7EB' },
-  seleccionado: { backgroundColor: '#1E3A8A' },
-  ocupado: { backgroundColor: '#9CA3AF' },
-  texto: { fontSize: 12, fontWeight: '600', color: '#333' },
-  textoClaro: { color: '#fff' },
-});
+const s = StyleSheet.create({ seat: { width: 44, minHeight: 54, margin: 3, borderRadius: 9, borderWidth: 1, borderColor: c.border, backgroundColor: c.surface, alignItems: 'center', justifyContent: 'center', paddingVertical: 4 },
+  selected: { backgroundColor: c.primary, borderColor: c.primary }, occupied: { backgroundColor: c.wineSoft, borderColor: c.wine }, label: { color: c.muted, fontSize: 10, fontWeight: '600', marginTop: 2 } });

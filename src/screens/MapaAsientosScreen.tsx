@@ -1,13 +1,10 @@
+import Icon from '../ui/Icon';
+import { colors } from '../ui/theme';
 import React, { useMemo, useState, useRef } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-} from 'react-native';
+import { View, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { Text, TextInput } from '../ui/Typography';
+import { useDialog } from '../ui/Dialog';
+
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
@@ -16,7 +13,7 @@ import { comprar } from '../redux/operaciones';
 import { guardarEstado } from '../redux/store';
 import Asiento from '../components/Asiento';
 import { useAppDispatch, useAppSelector } from '../redux/hooks';
-import { agregarReserva, obtenerAsientosOcupados } from '../redux/slices/reservasSlice';
+import { obtenerAsientosOcupados } from '../redux/slices/reservasSlice';
 import { RootStackParamList } from '../navigation/types';
 import { EstadoAsiento } from '../types/asiento';
 
@@ -25,6 +22,7 @@ function generarCodigoReserva(): string {
 }
 
 export default function MapaAsientosScreen() {
+  const Alert = useDialog();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<RouteProp<RootStackParamList, 'MapaAsientos'>>();
   const { funcionId, cantidad, peliculaCodigo } = route.params;
@@ -69,14 +67,9 @@ export default function MapaAsientosScreen() {
 
   const toggleAsiento = (id: string) => {
     if (registrada.current || asientosOcupadosIds.has(id)) return;
-    setSeleccionados((prev) => {
-      if (prev.includes(id)) return prev.filter((s) => s !== id);
-      if (prev.length >= cantidad) {
-        Alert.alert('Límite alcanzado', `Solo puedes seleccionar ${cantidad} asiento(s).`);
-        return prev;
-      }
-      return [...prev, id];
-    });
+    if (seleccionados.includes(id)) { setSeleccionados(prev => prev.filter(x => x !== id)); return; }
+    if (seleccionados.length >= cantidad) { Alert.alert('Límite alcanzado', `Solo puedes seleccionar ${cantidad} asiento(s).`); return; }
+    setSeleccionados(prev => [...prev, id]);
   };
 
   const total = pelicula.precio * cantidad;
@@ -124,21 +117,25 @@ export default function MapaAsientosScreen() {
         <Text style={styles.pantallaTexto}>PANTALLA</Text>
       </View>
 
-      <ScrollView horizontal contentContainerStyle={styles.mapa}>
+      <Text style={{ color: colors.muted, fontSize: 12, textAlign: 'center', marginBottom: 8 }}>Desliza hacia los lados para ver toda la sala.</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator contentContainerStyle={styles.mapa}>
+        <View style={{ flexDirection: 'column', gap: 6 }}>
         {sala.filas.map((fila) => (
           <View key={fila} style={styles.filaAsientos}>
+            <Text style={{ color: colors.muted, width: 22, textAlign: 'center' }}>{fila}</Text>
             {Array.from({ length: sala.columnas }, (_, i) => {
               const id = `${fila}${i + 1}`;
-              return <Asiento key={id} id={id} estado={estadoDe(id)} onPress={() => toggleAsiento(id)} />;
+              return <View key={id} style={{ marginLeft: i === Math.ceil(sala.columnas / 2) ? 18 : 0 }}><Asiento id={id} estado={estadoDe(id)} onPress={() => toggleAsiento(id)} /></View>;
             })}
           </View>
         ))}
+        </View>
       </ScrollView>
 
       <View style={styles.leyenda}>
-        <Leyenda color="#E5E7EB" texto="Disponible" />
-        <Leyenda color="#1E3A8A" texto="Seleccionado" />
-        <Leyenda color="#9CA3AF" texto="Ocupado" />
+        <Leyenda color={colors.muted} texto="Disponible" />
+        <Leyenda color={colors.primary} texto="Seleccionado" />
+        <Leyenda color={colors.danger} texto="Ocupado" />
       </View>
 
       <Text style={styles.seccion}>
@@ -175,50 +172,52 @@ export default function MapaAsientosScreen() {
 function Leyenda({ color, texto }: { color: string; texto: string }) {
   return (
     <View style={styles.leyendaItem}>
-      <View style={[styles.leyendaColor, { backgroundColor: color }]} />
+      <Icon name={texto === 'Ocupado' ? 'close' : 'seat-outline'} color={color} size={17} />
       <Text style={styles.leyendaTexto}>{texto}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  contenedor: { flex: 1, backgroundColor: '#fff' },
-  vacio: { color: '#888', textAlign: 'center', marginTop: 40 },
+  contenedor: { flex: 1, backgroundColor: colors.surface },
+  vacio: { color: colors.muted, textAlign: 'center', marginTop: 40 },
   titulo: { fontSize: 18, fontWeight: '700' },
-  subtitulo: { fontSize: 13, color: '#666', marginBottom: 12 },
+  subtitulo: { fontSize: 13, color: colors.muted, marginBottom: 12 },
   pantalla: {
-    backgroundColor: '#333',
-    paddingVertical: 6,
+    backgroundColor: colors.raised,
+    borderBottomWidth: 3,
+    borderBottomColor: colors.primary,
+    paddingVertical: 12,
     borderRadius: 4,
     alignItems: 'center',
     marginBottom: 16,
   },
-  pantallaTexto: { color: '#fff', fontSize: 11, letterSpacing: 2 },
-  mapa: { alignItems: 'center', marginBottom: 12 },
-  filaAsientos: { flexDirection: 'row' },
+  pantallaTexto: { color: colors.text, fontSize: 11, letterSpacing: 2 },
+  mapa: { flexGrow: 1, justifyContent: 'center', paddingVertical: 12, paddingRight: 8, marginBottom: 12 },
+  filaAsientos: { flexDirection: 'row', alignItems: 'center' },
   leyenda: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginBottom: 16 },
   leyendaItem: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 8 },
   leyendaColor: { width: 12, height: 12, borderRadius: 3, marginRight: 4 },
-  leyendaTexto: { fontSize: 12, color: '#555' },
+  leyendaTexto: { fontSize: 12, color: colors.muted },
   seccion: { fontSize: 14, fontWeight: '700', marginTop: 8, marginBottom: 8 },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: colors.border,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 15,
     marginBottom: 10,
   },
-  error: { color: '#B91C1C', marginBottom: 8, fontSize: 13 },
+  error: { color: colors.danger, marginBottom: 8, fontSize: 13 },
   total: { fontSize: 17, fontWeight: '700', marginTop: 8 },
   botonConfirmar: {
-    backgroundColor: '#1E3A8A',
+    backgroundColor: colors.primary,
     paddingVertical: 14,
     borderRadius: 10,
     alignItems: 'center',
     marginTop: 16,
     marginBottom: 32,
   },
-  botonConfirmarTexto: { color: '#fff', fontWeight: '700', fontSize: 15 },
+  botonConfirmarTexto: { color: colors.primaryText, fontWeight: '700', fontSize: 15 },
 });

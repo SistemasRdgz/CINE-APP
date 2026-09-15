@@ -1,6 +1,7 @@
 export type EstadoPelicula = 'Disponible' | 'No disponible';
 
 export interface Pelicula {
+  imagen?: string; // Nombre relativo del póster en almacenamiento privado.
   codigo: string;
   nombre: string;
   genero: string;
