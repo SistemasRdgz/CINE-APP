@@ -1,3 +1,6 @@
+import { guardarSala, borrarSala } from '../src/redux/operaciones';
+import { editarSala, eliminarSala } from '../src/redux/slices/salasSlice';
+import { cambiarTema } from '../src/redux/slices/preferenciasSlice';
 import { migraciones } from '../src/redux/migraciones';
 import { ampliarSala } from '../src/domain/salas';
 import { sugerirCodigo } from '../src/domain/catalogo';
@@ -16,7 +19,7 @@ import type { Reserva } from '../src/types/reserva';
 
 const pelicula = { codigo: 'P1', nombre: 'Prueba', genero: 'Drama', duracion: 90, clasificacion: 'A', salaAsignada: 'S1', precio: 4.5, estado: 'Disponible' as const };
 const funcion = { id: 'F1', peliculaCodigo: 'P1', salaId: 'S1', fecha: '2099-12-15', hora: '19:00' };
-const base = () => ({ peliculas: { lista: [pelicula] }, salas: { lista: [{ id: 'S1', nombre: 'Sala 1', filas: ['A','B'], columnas: 3, funciones: [funcion] }] }, reservas: { lista: [] as Reserva[] } });
+const base = () => ({ preferencias: { tema: 'oscuro' as const }, peliculas: { lista: [pelicula] }, salas: { lista: [{ id: 'S1', nombre: 'Sala 1', filas: ['A','B'], columnas: 3, funciones: [funcion] }] }, reservas: { lista: [] as Reserva[] } });
 const crearStore = () => configureStore({ reducer: rootReducer, preloadedState: base() });
 const reserva = (cambios: Partial<Reserva> = {}): Reserva => ({ id: 'BOL-ABC123', peliculaCodigo: 'P1', peliculaNombre: 'Prueba', salaId: 'S1', salaNombre: 'Sala 1', funcionId: 'F1', fecha: funcion.fecha, hora: funcion.hora, cantidadBoletos: 2, asientos: ['A1','A2'], total: 9, cliente: { nombre: 'Daniel' }, fechaCompra: new Date().toISOString(), usado: false, ...cambios });
 
@@ -92,12 +95,14 @@ test('persistencia: nueva instancia recupera catálogo, funciones y boleto usado
     return { store, persist: persist! };
   }
   const a = await iniciar();
+  a.store.dispatch(cambiarTema('claro'));
   a.store.dispatch(agregarPelicula(pelicula));
   a.store.dispatch(programarFuncion(funcion));
   assert.equal(a.store.dispatch(comprar(reserva())).ok, true);
   a.store.dispatch(validarQR(contenidoQR('BOL-ABC123')));
   await a.persist.flush(); a.persist.pause();
   const b = await iniciar();
+  assert.equal(b.store.getState().preferencias.tema, 'claro');
   assert.equal(b.store.getState().reservas.lista[0].usado, true);
   assert.ok(b.store.getState().peliculas.lista.some(p => p.codigo === 'P1'));
   assert.ok(b.store.getState().salas.lista[0].funciones.some(f => f.id === 'F1'));
@@ -142,4 +147,53 @@ test('migración real desde versión anterior conserva catálogo y boleto usado'
   assert.equal(resultado.salas.lista[0].filas.length, 8);
   assert.equal(resultado.reservas.lista[0].usado, true);
   assert.deepEqual(await createMigrate(migraciones)({ ...resultado, _persist: { version: 1, rehydrated: true } }, 1), { ...resultado, _persist: { version: 1, rehydrated: true } });
+});
+
+
+test('crear sala y comprar asientos en una función de esa sala', () => {
+  const s = crearStore();
+  assert.equal(s.dispatch(guardarSala({ id: 'S2', nombre: 'Sala nueva', filas: ['A','B','C'], columnas: 4 }, false)).ok, true);
+  s.dispatch(agregarPelicula({ ...pelicula, codigo: 'P2', salaAsignada: 'S2' }));
+  assert.equal(s.dispatch(programarFuncion({ ...funcion, id: 'F2', salaId: 'S2', peliculaCodigo: 'P2' })).ok, true);
+  assert.equal(s.dispatch(comprar(reserva({ id: 'BOL-NUEVA1', funcionId: 'F2', salaId: 'S2', peliculaCodigo: 'P2', asientos: ['C3','C4'] }))).ok, true);
+  assert.equal(estadisticas(s.getState()).disponibles, 16);
+});
+test('salas: códigos y nombres repetidos, tamaños inválidos y filas duplicadas', () => {
+  const s = crearStore();
+  const datos = { id: 'S2', nombre: 'Nueva', filas: ['A','B'], columnas: 4 };
+  for (const cambios of [{ id: 's1' }, { nombre: 'Sala 1' }, { nombre: '' }, { columnas: 0 }, { columnas: 21 }, { columnas: 2.5 }, { filas: ['A','A'] }, { filas: [] }]) {
+    assert.equal(s.dispatch(guardarSala({ ...datos, ...cambios }, false)).ok, false);
+  }
+  assert.equal(s.getState().salas.lista.length, 1);
+});
+test('salas con funciones conservan distribución y reservas; renombrar sí es posible', () => {
+  const s = crearStore(); s.dispatch(comprar(reserva()));
+  s.dispatch(editarSala({ id: 'S1', nombre: 'Sala 1', filas: ['A'], columnas: 1 }));
+  assert.equal(s.getState().salas.lista[0].columnas, 3);
+  assert.equal(s.dispatch(guardarSala({ id: 'S1', nombre: 'Sala Principal', filas: ['A','B'], columnas: 3 }, true)).ok, true);
+  assert.deepEqual(s.getState().reservas.lista[0].asientos, ['A1','A2']);
+  assert.equal(s.getState().salas.lista[0].funciones.length, 1);
+  s.dispatch(eliminarSala('S1'));
+  assert.equal(s.getState().salas.lista.length, 1);
+});
+test('solo se pueden eliminar salas sin películas, funciones ni reservas', () => {
+  const s = crearStore();
+  const datos = { id: 'S2', nombre: 'Sala 2', filas: ['A'], columnas: 5 };
+  s.dispatch(guardarSala(datos, false));
+  assert.equal(s.dispatch(borrarSala('S2')).ok, true);
+  s.dispatch(guardarSala(datos, false));
+  s.dispatch(agregarPelicula({ ...pelicula, codigo: 'P2', salaAsignada: 'S2' }));
+  assert.equal(s.dispatch(borrarSala('S2')).ok, false);
+  assert.equal(s.getState().salas.lista.length, 2);
+});
+test('cambiar tema no altera compras, salas ni catálogo', () => {
+  const s = crearStore(); s.dispatch(comprar(reserva()));
+  const antes = s.getState();
+  s.dispatch(cambiarTema('claro'));
+  assert.equal(s.getState().preferencias.tema, 'claro');
+  assert.equal(s.getState().reservas, antes.reservas);
+  assert.equal(s.getState().salas, antes.salas);
+  assert.equal(s.getState().peliculas, antes.peliculas);
+  s.dispatch(cambiarTema('oscuro'));
+  assert.equal(s.getState().preferencias.tema, 'oscuro');
 });

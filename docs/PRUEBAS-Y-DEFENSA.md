@@ -86,3 +86,18 @@ La base es local, sin servidor. La biometría valida al usuario del dispositivo;
 - Desde una pantalla administrativa, pulsar Inicio y regresar debe pedir huella otra vez. La excepción temporal corresponde únicamente al selector de imágenes abierto por la app.
 
 Las pruebas automáticas no sustituyen estas comprobaciones visuales y de hardware en Android.
+
+## Salas y tema claro/oscuro
+
+1. Desde la cartelera pulsa el sol para activar Claro. Verifica textos, filtros, botones, íconos y navegación. Cambia a Oscuro y comprueba que el modo anterior se recupera.
+2. En un formulario escribe un dato, cambia de tema desde la barra superior y verifica que el dato siga presente. La navegación no debe reiniciarse ni cerrarse la sesión de Personal por cambiar de tema.
+3. Elige Claro, cierra la app y vuelve a abrir: debe conservarse. Repite la comprobación con Oscuro.
+4. En Personal → Gestión de salas crea S3, Sala 3, 5 filas y 8 asientos: capacidad 40.
+5. Intenta crear código/nombre repetido, nombre vacío y tamaños fuera de rango: rechazar.
+6. Crea o edita una película para asignarla a S3. Programa una función futura. El dashboard debe sumar 40 lugares a su capacidad, no al crear la sala vacía.
+7. Compra un boleto en E8. El mapa debe tener A-E y columnas 1-8; verificar total, QR y asiento ocupado.
+8. Intenta cambiar la distribución o eliminar la sala con funciones: bloquear. Renombrarla debe funcionar sin borrar funciones ni reservas.
+9. Crea una sala temporal sin películas ni funciones y elimínala. Cancelar la confirmación debe conservarla.
+10. Cierra y reabre la app: comprobar sala nueva, función, reserva, tema y acceso biométrico.
+
+Estado automatizado: 17 pruebas de dominio/persistencia aprobadas y exportación Android completada. Las comprobaciones visuales y físicas anteriores requieren el dispositivo.

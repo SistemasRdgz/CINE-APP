@@ -103,3 +103,11 @@ npm run export:android
 Las pruebas de persistencia usan el adaptador de almacenamiento en memoria para simular una nueva instancia de Redux Persist. El cierre y reapertura reales, la cámara, los permisos y la biometría requieren validación en Android. La exportación genera un bundle JavaScript Android, **no un APK ni una prueba de hardware**.
 
 Consulta [docs/PRUEBAS-Y-DEFENSA.md](docs/PRUEBAS-Y-DEFENSA.md) para la matriz de la rúbrica y la demostración.
+
+## Gestión de salas y apariencia
+
+En **Personal → Gestión de salas** puedes crear salas, indicar nombre/código y definir de 1 a 26 filas y de 1 a 20 asientos por fila. Se muestra la capacidad antes de guardar. Las salas nuevas aparecen en el formulario de películas; asigna una película a la sala y luego programa su función.
+
+Se permite renombrar una sala. La distribución se puede modificar solo mientras no tenga funciones, para no invalidar asientos existentes. Se impide eliminar salas con películas asignadas, funciones o reservas. Las salas sin referencias se pueden eliminar con confirmación. La capacidad del dashboard se sigue calculando por función: crear una sala vacía no aumenta los lugares disponibles hasta programar una función.
+
+El botón de **sol/luna** en la barra superior alterna modo claro y oscuro, tanto para el cliente como para Personal. El tema se aplica mediante contexto, conserva la pantalla y los datos del formulario, y se persiste en el slice `preferencias` con AsyncStorage. Al actualizar desde una versión anterior sin esa preferencia se mantiene el modo oscuro inicial. Los QR siguen siendo negros sobre blanco y los pósters conservan sus colores. Los diálogos del sistema operativo (permisos, huella, fecha/hora) dependen del tema de Android.
